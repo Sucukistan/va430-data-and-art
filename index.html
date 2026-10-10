@@ -918,7 +918,7 @@ function sketch(p) {
   const PHASE_NAME = { wait: "waiting", r1: "round 1 open", r2: "round 2 open", words: "words open", closed: "closed" };
   const avg = a => Math.round(a.reduce((s, v) => s + v, 0) / a.length);
   function renderLive() {
-    if (!LIVE_ON) return;
+    if (!LIVE_ON && !live.pasted) return;
     document.querySelectorAll("#res .res-track").forEach(tr => {
       const k = tr.dataset.k, box = tr.querySelector(".dots"), zone = tr.querySelector(".classzone");
       if (!box) return;
@@ -958,8 +958,30 @@ function sketch(p) {
     }
     const chip = $("#liveChip");
     chip.hidden = false; chip.classList.toggle("on", live.connected);
-    chip.innerHTML = `<i></i>LIVE · ${PHASE_NAME[live.phase] || live.phase} · ${live.phones} phones · R1 ${live.r1.size} · R2 ${live.r2.size}${live.control ? " · <b>you control</b>" : ""}`;
+    chip.innerHTML = LIVE_ON
+      ? `<i></i>LIVE · ${PHASE_NAME[live.phase] || live.phase} · ${live.phones} phones · R1 ${live.r1.size} · R2 ${live.r2.size}${live.control ? " · <b>you control</b>" : ""}`
+      : `<i></i>PASTED DATA · R1 ${live.r1.size} · R2 ${live.r2.size}`;
   }
+  /* Backup without the live connection: paste answers (e.g. from a Google Form sheet) on slide 17 or 20.
+     One person per line, numbers in the order warm–cool, calm–tense, ordered–chaotic, flat–deep.
+     4 numbers = round 1; 8 numbers = round 1 then round 2. A 0–10 scale is converted to 0–100. */
+  addEventListener("paste", e => {
+    const hook = document.querySelector(".slide.active")?.dataset.hook;
+    if ((hook !== "results" && hook !== "shift") || (e.target && (e.target.isContentEditable || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)))) return;
+    const text = (e.clipboardData || window.clipboardData).getData("text");
+    const need = hook === "shift" ? 8 : 4;           // the last 4 (or 8) numbers on each line are the ratings
+    const rows = text.split(/\r?\n/).map(l => (l.match(/(?<![A-Za-z\d.])\d+(?:\.\d+)?(?![A-Za-z\d.])/g) || []).map(Number))
+      .filter(r => r.length >= need).map(r => r.slice(-need)).filter(r => r.every(v => v >= 0 && v <= 100));
+    if (!rows.length) return;
+    e.preventDefault();
+    const k = Math.max(...rows.flat()) <= 10 ? 10 : 1;
+    const toObj = a => ({ cool: Math.round(a[0] * k), tense: Math.round(a[1] * k), chaos: Math.round(a[2] * k), deep: Math.round(a[3] * k) });
+    rows.forEach((r, i) => {
+      live.r1.set("paste-" + i, toObj(r.slice(0, 4)));
+      if (need === 8) live.r2.set("paste-" + i, toObj(r.slice(4, 8)));
+    });
+    live.pasted = true; renderLive();
+  });
 
   /* ---------------- deck engine ---------------- */
   const stage = $("#stage");
