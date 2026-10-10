@@ -166,6 +166,26 @@
   .bloomhost { width: 960px; height: 520px; background: var(--card); border: 1px solid var(--rule); }
   .bloomhost canvas { display: block; }
 
+  /* class portrait */
+  .portrait { display: grid; grid-template-columns: 660px 1fr; gap: 64px; flex: 1; align-items: start; }
+  .portraithost { width: 660px; height: 660px; background: var(--night-2); }
+  .portraithost canvas { display: block; width: 660px; height: 660px; }
+  .dark .modes button { text-align: left; display: flex; justify-content: space-between; gap: 12px; }
+  .dark .modes button span { opacity: .6; }
+  .modes { display: flex; flex-direction: column; gap: 12px; max-width: 520px; }
+  .pread { font: 400 30px/1.35 var(--body); color: var(--night-ink); max-width: 820px; min-height: 162px; }
+
+  /* raw rows and contested-axis tags (results, shift) */
+  .raw { position: absolute; right: 128px; top: 150px; width: 470px; font: 400 18px/1.5 var(--mono); color: var(--night-mute); border-top: 2px solid var(--night-rule); padding-top: 8px; }
+  .raw .h { display: flex; justify-content: space-between; }
+  .raw .h b { font-weight: 500; color: var(--night-ink); }
+  .raw ol { list-style: none; margin: 4px 0 0; padding: 0; height: 189px; overflow: hidden; }
+  .raw li { white-space: pre; }
+  .raw li.new { animation: rawin 1.2s ease both; }
+  @keyframes rawin { from { opacity: 0; background: rgba(106, 117, 255, .45); color: var(--night-ink); } 30% { opacity: 1; } to { background: transparent; } }
+  .res-cap .flag { display: inline-block; margin-left: 16px; padding: 3px 9px; font: 500 17px var(--mono); letter-spacing: .03em; color: var(--night-ink); border: 2px solid var(--ikb-d); vertical-align: 1px; }
+  .res-cap .flag.m { background: var(--machine-d); border-color: var(--machine-d); color: var(--night); }
+
   /* context */
   .ctx { display: grid; grid-template-columns: 700px 1fr; gap: 72px; flex: 1; align-items: start; }
   .ctxfig { margin: 0; display: flex; flex-direction: column; gap: 14px; }
@@ -269,15 +289,15 @@
   .sl .track i { position: absolute; top: 50%; width: 30px; height: 30px; border-radius: 50%; background: var(--night-ink); transform: translate(-50%, -50%); }
 
   /* results */
-  .res { display: flex; flex-direction: column; gap: 30px; flex: 1; }
+  .res { display: flex; flex-direction: column; gap: 18px; flex: 1; }
   .res-row { display: grid; grid-template-columns: 210px 1fr 210px; gap: 28px; align-items: center; }
   .res-row .end { font: 500 26px var(--mono); }
   .res-row .end.r { text-align: right; }
-  .res-track { position: relative; height: 112px; border-bottom: 2px solid var(--night-ink); }
+  .res-track { position: relative; height: 88px; border-bottom: 2px solid var(--night-ink); }
   .res-track .classzone { position: absolute; inset: 0 0 6px; border: 2px dashed var(--night-rule); display: grid; place-items: center; font: 400 20px var(--mono); color: var(--night-mute); }
   .res-track .mk { position: absolute; bottom: -14px; width: 26px; height: 26px; background: var(--machine-d); transform: translateX(-50%) rotate(45deg); transition: left .8s ease; box-shadow: 0 0 0 3px var(--night); }
   .res-track .mkl { position: absolute; bottom: 22px; transform: translateX(-50%); font: 500 20px var(--mono); color: var(--night-ink); white-space: nowrap; transition: left .8s ease; }
-  .res-cap { grid-column: 2; font: 400 18px/1.3 var(--mono); color: var(--night-mute); margin-top: -18px; }
+  .res-cap { grid-column: 2; font: 400 18px/1.3 var(--mono); color: var(--night-mute); margin-top: -8px; }
   .res-track .dots { position: absolute; inset: 0; }
   .res-track .dots svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   .dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--ikb-d); transform: translate(-50%, 50%); transition: left .5s ease, bottom .5s ease; box-shadow: 0 0 0 2px var(--night); }
@@ -715,10 +735,11 @@
   <!-- 15 · Results -->
   <section class="slide dark" data-part="3 · Live exercise" data-hook="results">
     <div class="meta"><span>3 · Live exercise</span><span>Class vs. machine</span></div>
-    <h2 class="title">The gap is not an error. It is the discussion.</h2>
+    <h2 class="title" style="max-width:1060px">The gap is not an error. It is the discussion.</h2>
+    <div class="raw" aria-label="Raw rows as they arrive"></div>
     <div class="legend"><span><i style="background:var(--ikb-d)"></i>Class (live)</span><span><i style="background:var(--machine-d); transform:rotate(45deg) scale(.8)"></i>Machine estimate</span><span class="label" id="resNote"></span></div>
     <div class="res" id="res"></div>
-    <aside class="notes">The diamond is computed from pixels only, and each row says how; the dashed area is where the class’s live distribution goes. Ask: on which axis are we furthest from the machine, and on which do we disagree most with each other?</aside>
+    <aside class="notes">The diamond is computed from pixels only; the tags mark the axis where we disagree most with each other (largest standard deviation) and the one furthest from the machine. Top right is the raw table as it arrives: this is the data before it is drawn, same as the cleaning slide.</aside>
   </section>
 
   <!-- 18 · Context -->
@@ -763,7 +784,8 @@
   <!-- 20 · Shift -->
   <section class="slide dark" data-part="3 · Live exercise" data-hook="shift">
     <div class="meta"><span>3 · Live exercise</span><span>Round 1 → Round 2</span></div>
-    <h2 class="title">Did context change what we saw?</h2>
+    <h2 class="title" style="max-width:1060px">Did context change what we saw?</h2>
+    <div class="raw" aria-label="Raw rows as they arrive"></div>
     <div class="legend"><span><i style="border:3px solid var(--ikb-d); box-sizing:border-box"></i>Round 1</span><span><i style="background:var(--ikb-d)"></i>Round 2</span><span><i style="background:var(--machine-d); transform:rotate(45deg) scale(.8)"></i>Machine, unchanged</span></div>
     <div class="res" id="shift"></div>
     <aside class="notes">Arrows show how each person moved between rounds. The machine did not move at all: the pixels did not change, only what we know.</aside>
@@ -779,6 +801,33 @@
       <div><h3>Context</h3><p>The artist, the labor, the period: what did we leave out?</p></div>
     </div>
     <aside class="notes">Kerem leads this part. Keep the shift slide one click back so we can return to it.</aside>
+  </section>
+
+  <!-- 22 · Class portrait -->
+  <section class="slide dark" data-part="3 · Live exercise" data-hook="portrait">
+    <div class="meta"><span>3 · Live exercise</span><span>Your data</span></div>
+    <h2 class="title">Same answers, six forms.</h2>
+    <div hidden><i data-step="1"></i><i data-step="2"></i><i data-step="3"></i><i data-step="4"></i><i data-step="5"></i></div>
+    <div class="portrait">
+      <div class="portraithost"><canvas id="portraitCv" width="1080" height="1080" role="img" aria-label="The class's answers drawn as an image"></canvas></div>
+      <div style="display:flex; flex-direction:column; gap:26px; min-width:0">
+        <div class="modes" id="portraitModes">
+          <button type="button" class="chip" data-p="lines" aria-pressed="true">Lines <span>a chart</span></button>
+          <button type="button" class="chip" data-p="blooms" aria-pressed="false">Blooms <span>the p5 sketch</span></button>
+          <button type="button" class="chip" data-p="glyphs" aria-pressed="false">Glyphs <span>Dear Data</span></button>
+          <button type="button" class="chip" data-p="weave" aria-pressed="false">Weave <span>a textile</span></button>
+          <button type="button" class="chip" data-p="dots" aria-pressed="false">Dots <span>Seurat</span></button>
+          <button type="button" class="chip" data-p="together" aria-pressed="false">Together <span>one shape</span></button>
+        </div>
+        <p class="pread" id="portraitRead"></p>
+        <div class="toolbar-row">
+          <button type="button" class="chip" id="portraitPlay" aria-pressed="false">Play</button>
+          <button type="button" class="chip" id="portraitSave">Save PNG</button>
+          <span class="label" id="portraitCount"></span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">Same answers, six forms; the arrow key walks through them, Play cycles them. Ask which form is most accurate, which one you would hang at SUSAM, and why those are not the same one.</aside>
   </section>
 
   <!-- 17 · Brief -->
@@ -913,12 +962,29 @@ function sketch(p) {
   /* ---------------- live layer: active only when config.js defines window.LIVE ---------------- */
   const LIVE = window.LIVE || null;
   const LIVE_ON = !!(LIVE && LIVE.url && LIVE.key && window.supabase && /^va430-[\w.-]{1,54}$/.test(LIVE.session || ""));
-  const live = { r1: new Map(), r2: new Map(), words: new Map(), hidden: new Set(), ghosts: [], phones: 0, phase: "wait", control: false, connected: false, setPhase: null };
+  const live = { r1: new Map(), r2: new Map(), words: new Map(), hidden: new Set(), ghosts: [], phones: 0, phase: "wait", control: false, connected: false, setPhase: null, log: [], logged: new Set() };
   const AXIS_I = { cool: 0, tense: 1, chaos: 2, deep: 3 };
+  const KEYS = ["cool", "tense", "chaos", "deep"];
   const PHASE_NAME = { wait: "waiting", r1: "round 1 open", r2: "round 2 open", words: "words open", closed: "closed" };
   const avg = a => Math.round(a.reduce((s, v) => s + v, 0) / a.length);
+  const sd = a => { const m = a.reduce((s, v) => s + v, 0) / a.length; return Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / a.length); };
+  /* every rating that arrives is also kept as a raw row, shown before it is drawn */
+  function logRow(round, dev, v) {
+    const id = round + ":" + dev; if (live.logged.has(id)) return; live.logged.add(id);
+    live.log.push({ t: new Date().toTimeString().slice(0, 8), line: [round, String(dev).slice(0, 4), v.cool, v.tense, v.chaos, v.deep].join(",") });
+  }
+  let rawShown = 0;
+  function renderRaw(force) {
+    if (!force && live.log.length === rawShown) return;
+    const fresh = live.log.length - rawShown; rawShown = live.log.length;
+    const rows = live.log.slice(-7).reverse();
+    const html = `<div class="h"><span>raw rows, as they arrive</span><b>${live.log.length}</b></div><ol><li>time     round,id,cool,tense,chaos,deep</li>${rows.map((r, i) => `<li class="${i < fresh && !force ? "new" : ""}">${r.t} ${escHtml(r.line)}</li>`).join("")}</ol>`;
+    document.querySelectorAll(".raw").forEach(el => { el.innerHTML = html; });
+  }
   function renderLive() {
     if (!LIVE_ON && !live.pasted) return;
+    renderRaw(false);
+    const spread = {};
     document.querySelectorAll("#res .res-track").forEach(tr => {
       const k = tr.dataset.k, box = tr.querySelector(".dots"), zone = tr.querySelector(".classzone");
       if (!box) return;
@@ -927,18 +993,28 @@ function sketch(p) {
       zone.hidden = vals.length > 0 || ghosts.length > 0;
       const bins = new Map(), step = vals.length > 40 ? 8 : 13;
       let h = "";
-      vals.forEach(v => { const b = Math.round(v / 2), n = bins.get(b) || 0; bins.set(b, n + 1); h += `<span class="dot" style="left:${v}%; bottom:${Math.min(96, 8 + n * step)}px"></span>`; });
+      vals.forEach(v => { const b = Math.round(v / 2), n = bins.get(b) || 0; bins.set(b, n + 1); h += `<span class="dot" style="left:${v}%; bottom:${Math.min(74, 8 + n * step)}px"></span>`; });
       ghosts.forEach(g => { h += `<span class="ghost" style="left:${g.v[AXIS_I[k]]}%"></span>`; });
-      if (vals.length) { const m = avg(vals); h += `<span class="mean" style="left:${m}%"><span>class ${m}</span></span>`; }
+      if (vals.length) { const m = avg(vals); h += `<span class="mean" style="left:${m}%"><span>class ${m}</span></span>`; spread[k] = { sd: sd(vals), mean: m, n: vals.length }; }
       box.innerHTML = h;
     });
+    /* the most contested axes mark themselves: largest spread inside the class, largest gap to the machine */
+    const ks = Object.keys(spread).filter(k => spread[k].n >= 3);
+    const most = (f) => ks.length ? ks.reduce((a, b) => f(b) > f(a) ? b : a) : null;
+    const divided = most(k => spread[k].sd), far = lastM ? most(k => Math.abs(spread[k].mean - lastM[k])) : null;
+    document.querySelectorAll("#res [data-rc]").forEach(cap => {
+      const k = cap.dataset.rc, f = cap.querySelector(".flags"); if (!f) return;
+      f.innerHTML = (k === divided ? `<span class="flag">most divided · spread ±${Math.round(spread[k].sd)}</span>` : "")
+        + (k === far ? `<span class="flag m">furthest from the machine · ${Math.abs(spread[k].mean - lastM[k])} points</span>` : "");
+    });
     const ink = css("--ikb-d");
+    const moved = {};
     document.querySelectorAll("#shift .res-track").forEach(tr => {
       const k = tr.dataset.k, box = tr.querySelector(".dots"), zone = tr.querySelector(".classzone");
       if (!box) return;
       const pairs = [...live.r2.entries()].filter(([d]) => live.r1.has(d)).map(([d, v2]) => [live.r1.get(d)[k], v2[k]]).sort((a, b) => a[0] - b[0]);
       zone.hidden = pairs.length > 0;
-      const W = tr.clientWidth || 1188, H = 112;
+      const W = tr.clientWidth || 1188, H = tr.clientHeight || 88;
       let s = `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs><marker id="ah-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${ink}"/></marker></defs>`;
       pairs.forEach(([a, b], i) => {
         const y = pairs.length === 1 ? H / 2 : 10 + i * (H - 20) / (pairs.length - 1), x1 = a / 100 * W, x2 = b / 100 * W;
@@ -948,7 +1024,14 @@ function sketch(p) {
       box.innerHTML = pairs.length ? s + "</svg>" : "";
       const cap = document.querySelector(`#shift [data-cap="${k}"]`);
       if (cap) cap.textContent = pairs.length ? `class average ${avg(pairs.map(p => p[0]))} → ${avg(pairs.map(p => p[1]))} · ${pairs.filter(p => Math.abs(p[1] - p[0]) >= 10).length} of ${pairs.length} people moved 10 points or more` : "";
+      if (pairs.length >= 3) moved[k] = pairs.reduce((s, p) => s + Math.abs(p[1] - p[0]), 0) / pairs.length;
     });
+    const mk = Object.keys(moved);
+    if (mk.length) {
+      const top = mk.reduce((a, b) => moved[b] > moved[a] ? b : a);
+      const cap = document.querySelector(`#shift [data-cap="${top}"]`);
+      if (cap && moved[top] >= 1) cap.insertAdjacentHTML("beforeend", `<span class="flag">moved most · ${Math.round(moved[top])} points on average</span>`);
+    }
     const ww = $("#wordwall");
     if (ww) {
       const counts = new Map();
@@ -961,6 +1044,7 @@ function sketch(p) {
     chip.innerHTML = LIVE_ON
       ? `<i></i>LIVE · ${PHASE_NAME[live.phase] || live.phase} · ${live.phones} phones · R1 ${live.r1.size} · R2 ${live.r2.size}${live.control ? " · <b>you control</b>" : ""}`
       : `<i></i>PASTED DATA · R1 ${live.r1.size} · R2 ${live.r2.size}`;
+    if (slides[cur] && slides[cur].dataset.hook === "portrait") drawPortrait();
   }
   /* Backup without the live connection: paste answers (e.g. from a Google Form sheet) on slide 17 or 20.
      One person per line, numbers in the order warm–cool, calm–tense, ordered–chaotic, flat–deep.
@@ -977,8 +1061,9 @@ function sketch(p) {
     const k = Math.max(...rows.flat()) <= 10 ? 10 : 1;
     const toObj = a => ({ cool: Math.round(a[0] * k), tense: Math.round(a[1] * k), chaos: Math.round(a[2] * k), deep: Math.round(a[3] * k) });
     rows.forEach((r, i) => {
-      live.r1.set("paste-" + i, toObj(r.slice(0, 4)));
-      if (need === 8) live.r2.set("paste-" + i, toObj(r.slice(4, 8)));
+      const id = "row" + (i + 1), a = toObj(r.slice(0, 4));
+      live.r1.set(id, a); logRow(1, id, a);
+      if (need === 8) { const b = toObj(r.slice(4, 8)); live.r2.set(id, b); logRow(2, id, b); }
     });
     live.pasted = true; renderLive();
   });
@@ -1413,7 +1498,7 @@ function sketch(p) {
       <div class="res-row"><span class="end">${l}</span>
         <div class="res-track" data-k="${k}"><div class="classzone">${LIVE_ON ? "Waiting for answers" : "Live class results will appear here"}</div><div class="dots"></div>${lastM ? `<span class="mk" style="left:${lastM[k]}%"></span><span class="mkl" style="left:${lastM[k]}%">${lastM[k]}</span>` : ""}</div>
         <span class="end r">${r}</span></div>
-      <p class="res-cap">machine: ${how}</p>`).join("");
+      <p class="res-cap" data-rc="${k}">machine: ${how}<span class="flags"></span></p>`).join("");
     $("#resNote").textContent = lastM ? "" : "Add the artwork on the previous slide to compute the machine’s estimate.";
     renderLive();
   }
@@ -1422,7 +1507,7 @@ function sketch(p) {
     try { const im = await loadImg(exSrc); lastM = machine(analyze(im, 320)); } catch (e) { lastM = null; }
     drawResults(); if (typeof drawShift === "function") drawShift();
   }
-  hooks.results = { enter() { drawResults(); } };
+  hooks.results = { enter() { drawResults(); renderRaw(true); } };
   drawResults();
   function drawShift() {
     $("#shift").innerHTML = AXES.map(([l, r, k]) => `
@@ -1432,8 +1517,196 @@ function sketch(p) {
       <p class="res-cap" data-cap="${k}"></p>`).join("");
     renderLive();
   }
-  hooks.shift = { enter() { drawShift(); } };
+  hooks.shift = { enter() { drawShift(); renderRaw(true); } };
   drawShift();
+  renderRaw(true);
+
+  /* ---------------- 22 · class portrait: the same answers, six forms ---------------- */
+  const PMODES = ["lines", "blooms", "glyphs", "weave", "dots", "together"];
+  const PNAME = { lines: "Lines", blooms: "Blooms", glyphs: "Glyphs", weave: "Weave", dots: "Dots", together: "Together" };
+  const PREAD = {
+    lines: "A chart. Each line is one person, crossing the four questions at their own answers. White is the class average; orange is the machine.",
+    blooms: "The sketch from the p5.js slide, fed with your answers. One bloom per person: blue strokes for cool, longer for deep, tangled for tense, ragged for chaotic.",
+    glyphs: "Dear Data. One mark per person, in the order you answered: size is depth, colour runs warm to cool, spikes are tension, rays are chaos.",
+    weave: "A textile. One thread per person: colour runs warm to cool, wave height is tension, irregularity is chaos, thickness is depth.",
+    dots: "Seurat. Two answers become a position (warm to cool across, flat to deep upward); each cloud’s spread is chaos, its density is tension.",
+    together: "One shape. Everyone’s four answers on top of each other. White is the class average, dashed white the round 1 average, orange the machine."
+  };
+  const PC = { bg: "#1A1C20", ink: "#EEF0F2", mute: "#9DA3AC", rule: "#2E3238", blue: [106, 117, 255], sand: [224, 176, 122], mach: "#E5602A" };
+  const rgba = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const mixc = (k, a = 1) => rgba(PC.sand.map((v, j) => Math.round(v + (PC.blue[j] - v) * k)), a);
+  const seeded = s => () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const P = { mode: "lines", t: 1, raf: 0, play: 0, done: 0 };
+  const pcv = $("#portraitCv"), pc = pcv.getContext("2d");
+
+  function portraitPeople() {
+    const ids = new Set([...live.r1.keys(), ...live.r2.keys()]);   // arrival order
+    return [...ids].map(d => ({ v: live.r2.get(d) || live.r1.get(d), v1: live.r1.get(d) || null, v2: live.r2.get(d) || null }));
+  }
+  const meanOf = (vs) => Object.fromEntries(KEYS.map(k => [k, vs.reduce((s, v) => s + v[k], 0) / vs.length]));
+  function grid(n, x0, y0, size) {           // n cells, as square as possible, centred in a size×size box
+    const cols = Math.max(1, Math.ceil(Math.sqrt(n))), rows = Math.max(1, Math.ceil(n / cols)), cell = size / cols;
+    return { cell, at: i => [x0 + (i % cols + .5) * cell, y0 + (size - rows * cell) / 2 + (Math.floor(i / cols) + .5) * cell] };
+  }
+  const font = (w, px, fam = "IBM Plex Mono") => `${w} ${px}px "${fam}", monospace`;
+
+  const FORMS = {
+    lines(c, ps, e) {
+      const X = [190, 423, 657, 890], T = 130, B = 890, y = v => B - v / 100 * (B - T);
+      c.strokeStyle = PC.rule; c.lineWidth = 2; c.fillStyle = PC.mute; c.font = font(400, 24); c.textAlign = "center";
+      AXES.forEach(([lo, hi], i) => { c.beginPath(); c.moveTo(X[i], T); c.lineTo(X[i], B); c.stroke(); c.fillText(hi, X[i], T - 26); c.fillText(lo, X[i], B + 44); });
+      const path = (v, w, col, dash) => { c.setLineDash(dash || []); c.strokeStyle = col; c.lineWidth = w; c.beginPath(); KEYS.forEach((k, i) => { const yy = B - (B - y(v[k])) * e; i ? c.lineTo(X[i], yy) : c.moveTo(X[i], yy); }); c.stroke(); c.setLineDash([]); };
+      ps.forEach(p => path(p.v, 2, rgba(PC.blue, ps.length > 40 ? .35 : .6)));
+      if (lastM && ps.length) path(lastM, 4, PC.mach, [14, 10]);
+      if (ps.length) path(meanOf(ps.map(p => p.v)), 6, PC.ink);
+    },
+    blooms(c, ps, e) {
+      const g = grid(ps.length, 90, 60, 900);
+      ps.forEach((p, i) => {
+        const [x, y] = g.at(i), v = p.v, rnd = seeded(i * 7919 + 13), R = g.cell * .5 * (.35 + .65 * v.deep / 100);
+        c.lineWidth = Math.max(1.2, g.cell / 80);
+        for (let k = 0; k < 64; k++) {
+          const a = k / 64 * Math.PI * 2 - Math.PI / 2 + (rnd() * 2 - 1) * v.tense / 100 * .9;
+          const len = R * (1 - v.chaos / 100 * rnd() * .8);
+          if (k >= 64 * e) continue;
+          c.strokeStyle = rgba(k / 64 < v.cool / 100 ? PC.blue : PC.sand, .95);
+          c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len); c.stroke();
+        }
+      });
+    },
+    glyphs(c, ps, e) {
+      const g = grid(ps.length, 90, 60, 900);
+      ps.forEach((p, i) => {
+        const s = Math.max(0, Math.min(1, e * 1.6 - i / Math.max(1, ps.length) * .6)); if (!s) return;
+        const [x, y] = g.at(i), v = p.v, rnd = seeded(i * 104729 + 7), R = g.cell * .3 * (.35 + .65 * v.deep / 100) * s;
+        const rays = Math.round(v.chaos / 100 * 12), amp = v.tense / 100 * .32, spikes = 6 + Math.round(v.tense / 100 * 14);
+        c.strokeStyle = rgba([238, 240, 242], .8); c.lineWidth = Math.max(1.5, g.cell / 70);
+        for (let r = 0; r < rays; r++) { const a = rnd() * Math.PI * 2; c.beginPath(); c.moveTo(x + Math.cos(a) * R * 1.2, y + Math.sin(a) * R * 1.2); c.lineTo(x + Math.cos(a) * R * 1.55, y + Math.sin(a) * R * 1.55); c.stroke(); }
+        c.fillStyle = mixc(v.cool / 100); c.beginPath();
+        for (let j = 0; j <= spikes * 2; j++) { const a = j / (spikes * 2) * Math.PI * 2, rr = R * (1 + (j % 2 ? amp : -amp)); j ? c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr) : c.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+        c.fill();
+      });
+    },
+    weave(c, ps, e) {
+      const n = ps.length; if (!n) return;
+      const gap = Math.min(64, 840 / n), top = 510 - gap * (n - 1) / 2, X0 = 70, X1 = 1010, WX = 52;
+      const lines = ps.map((p, i) => {
+        const v = p.v, rnd = seeded(i * 15485863 + 3), A = v.tense / 100 * Math.min(gap * 1.3, 60), f = .012 + rnd() * .01, ph = rnd() * 6.28;
+        const noise = [0, 1, 2].map(() => [.02 + rnd() * .05, rnd() * 6.28]), N = v.chaos / 100 * Math.min(gap, 26);
+        const yAt = x => top + i * gap + A * Math.sin(x * f + ph) + N * noise.reduce((s, [fq, p0]) => s + Math.sin(x * fq + p0), 0) / 3;
+        return { yAt, th: 2 + v.deep / 100 * Math.min(gap * .7, 24), col: mixc(v.cool / 100) };
+      });
+      c.strokeStyle = PC.rule; c.lineWidth = 2;
+      for (let x = X0; x <= X1; x += WX) { c.beginPath(); c.moveTo(x, 40); c.lineTo(x, 980); c.stroke(); }
+      const xEnd = X0 + (X1 - X0) * e;
+      lines.forEach(L => { c.strokeStyle = L.col; c.lineWidth = L.th; c.lineCap = "round"; c.beginPath(); for (let x = X0; x <= xEnd; x += 4) x === X0 ? c.moveTo(x, L.yAt(x)) : c.lineTo(x, L.yAt(x)); c.stroke(); });
+      c.lineCap = "butt";
+      lines.forEach((L, i) => {                // the warp passes over every other crossing
+        for (let j = 0, x = X0; x <= xEnd; j++, x += WX) {
+          if ((i + j) % 2) continue;
+          const y = L.yAt(x); c.fillStyle = PC.bg; c.fillRect(x - 4, y - L.th / 2 - 3, 8, L.th + 6);
+          c.strokeStyle = PC.rule; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y - L.th / 2 - 3); c.lineTo(x, y + L.th / 2 + 3); c.stroke();
+        }
+      });
+    },
+    dots(c, ps, e) {
+      const X = v => 150 + v / 100 * 780, Y = v => 880 - v / 100 * 760;
+      c.strokeStyle = PC.rule; c.lineWidth = 2; c.strokeRect(150, 120, 780, 760);
+      c.fillStyle = PC.mute; c.font = font(400, 24);
+      c.textAlign = "left"; c.fillText("warm", 150, 920); c.textAlign = "right"; c.fillText("cool", 930, 920);
+      c.save(); c.translate(118, 880); c.rotate(-Math.PI / 2); c.textAlign = "left"; c.fillText("flat", 0, 0); c.textAlign = "right"; c.fillText("deep", 760, 0); c.restore();
+      ps.forEach((p, i) => {
+        const v = p.v, rnd = seeded(i * 2654435761 + 1), cx = X(v.cool), cy = Y(v.deep), spread = 12 + v.chaos / 100 * 70, count = 24 + Math.round(v.tense / 100 * 90);
+        for (let k = 0; k < count; k++) {
+          const a = rnd() * Math.PI * 2, r = spread * Math.sqrt(rnd()), blue = rnd() < v.cool / 100;
+          if (k >= count * e) continue;
+          c.fillStyle = rgba(blue ? PC.blue : PC.sand, .85); c.beginPath(); c.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 4, 0, Math.PI * 2); c.fill();
+        }
+      });
+      if (lastM && ps.length) {
+        const x = X(lastM.cool), y = Y(lastM.deep);
+        c.fillStyle = PC.mach; c.strokeStyle = PC.bg; c.lineWidth = 4; c.beginPath(); c.moveTo(x, y - 16); c.lineTo(x + 16, y); c.lineTo(x, y + 16); c.lineTo(x - 16, y); c.closePath(); c.stroke(); c.fill();
+        c.fillStyle = PC.ink; c.font = font(500, 22); c.textAlign = "left"; c.fillText("machine", x + 24, y + 8);
+      }
+    },
+    together(c, ps, e) {
+      const cx = 540, cy = 510, R = 360, ang = i => -Math.PI / 2 + i * Math.PI / 2;
+      const pt = (i, v, s = 1) => [cx + Math.cos(ang(i)) * R * v / 100 * s, cy + Math.sin(ang(i)) * R * v / 100 * s];
+      c.strokeStyle = PC.rule; c.lineWidth = 2;
+      [25, 50, 75, 100].forEach(r => { c.beginPath(); KEYS.forEach((k, i) => { const [x, y] = pt(i, r); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.stroke(); });
+      KEYS.forEach((k, i) => { const [x, y] = pt(i, 100); c.beginPath(); c.moveTo(cx, cy); c.lineTo(x, y); c.stroke(); });
+      c.fillStyle = PC.mute; c.font = font(400, 24); c.textAlign = "center";
+      AXES.forEach(([lo, hi], i) => { const [x, y] = pt(i, 100); c.fillText(`${hi}`, x + Math.cos(ang(i)) * 56, y + Math.sin(ang(i)) * 40 + 8); });
+      c.fillText("centre: warm · calm · ordered · flat", cx, 960);
+      const shape = (v, fill, stroke, w, dash) => {
+        c.beginPath(); KEYS.forEach((k, i) => { const [x, y] = pt(i, v[k], e); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath();
+        if (fill) { c.fillStyle = fill; c.fill(); }
+        c.setLineDash(dash || []); c.strokeStyle = stroke; c.lineWidth = w; c.stroke(); c.setLineDash([]);
+      };
+      const fa = Math.min(.14, 1 / Math.max(1, ps.length));
+      ps.forEach(p => shape(p.v, rgba(PC.blue, fa), rgba(PC.blue, .5), 1.5));
+      if (!ps.length) return;
+      if (lastM) shape(lastM, null, PC.mach, 4, [14, 10]);
+      const r1 = ps.filter(p => p.v1).map(p => p.v1);
+      if (ps.some(p => p.v2) && r1.length) shape(meanOf(r1), null, PC.ink, 3, [6, 8]);
+      shape(meanOf(ps.map(p => p.v)), null, PC.ink, 6);
+    }
+  };
+
+  function drawPortrait() {
+    const ps = portraitPeople(), c = pc, e = 1 - Math.pow(1 - Math.min(1, P.t), 3);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.fillStyle = PC.bg; c.fillRect(0, 0, 1080, 1080);
+    FORMS[P.mode](c, ps, e);
+    if (!ps.length) {
+      c.fillStyle = "rgba(26,28,32,.82)"; c.fillRect(140, 430, 800, 150);
+      c.textAlign = "center"; c.fillStyle = PC.ink; c.font = font(700, 46, "Archivo"); c.fillText("Your answers will be drawn here.", 540, 498);
+      c.fillStyle = PC.mute; c.font = font(400, 22); c.fillText("live from the phones, or pasted on the results slide", 540, 545);
+    }
+    const date = (edits.date && edits.date !== "[Date]") ? " · " + edits.date : "";
+    c.font = font(400, 20); c.fillStyle = PC.mute;
+    c.textAlign = "left"; c.fillText("VA430 / VA530 Art Analysis · Sabancı University" + date, 40, 1046);
+    c.textAlign = "right"; c.fillText(`${ps.length} ${ps.length === 1 ? "person" : "people"} · ${PNAME[P.mode]}`, 1040, 1046);
+    $("#portraitCount").textContent = ps.length ? `${ps.length} ${ps.length === 1 ? "person" : "people"}${live.r2.size ? " · round 2 where given" : ""}` : "no answers yet";
+  }
+  function animatePortrait() {
+    cancelAnimationFrame(P.raf);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { P.t = 1; drawPortrait(); return; }
+    const t0 = performance.now(); P.t = 0;
+    const tick = now => { P.t = Math.min(1, (now - t0) / 1300); drawPortrait(); if (P.t < 1) P.raf = requestAnimationFrame(tick); };
+    P.raf = requestAnimationFrame(tick);
+    clearTimeout(P.done); P.done = setTimeout(() => { if (P.t < 1) { cancelAnimationFrame(P.raf); P.t = 1; drawPortrait(); } }, 1600);   // if frames stall, still show the final image
+  }
+  function setPortrait(mode) {
+    P.mode = mode;
+    document.querySelectorAll("#portraitModes button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.p === mode)));
+    $("#portraitRead").textContent = PREAD[mode];
+    animatePortrait();
+  }
+  function stopPlay() { clearInterval(P.play); P.play = 0; $("#portraitPlay").setAttribute("aria-pressed", "false"); $("#portraitPlay").textContent = "Play"; }
+  hooks.portrait = {
+    enter() { if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (slides[cur].dataset.hook === "portrait") drawPortrait(); }); },
+    step(st) { setPortrait(PMODES[st] || "lines"); }
+  };
+  document.querySelectorAll("#portraitModes button").forEach(b => b.addEventListener("click", () => { step = PMODES.indexOf(b.dataset.p); render(false); }));
+  $("#portraitPlay").addEventListener("click", () => {
+    if (P.play) { stopPlay(); return; }
+    $("#portraitPlay").setAttribute("aria-pressed", "true"); $("#portraitPlay").textContent = "Stop";
+    P.play = setInterval(() => {
+      if (slides[cur].dataset.hook !== "portrait") { stopPlay(); return; }
+      step = (step + 1) % PMODES.length; render(false);
+    }, 5000);
+  });
+  /* PNG export works on the hosted site; inside the Claude artifact downloads are blocked, so the button is hidden there */
+  $("#portraitSave").hidden = !LIVE;
+  $("#portraitSave").addEventListener("click", () => {
+    cancelAnimationFrame(P.raf); P.t = 1; drawPortrait();
+    pcv.toBlob(b => {
+      if (!b) return;
+      const a = document.createElement("a"), u = URL.createObjectURL(b);
+      a.href = u; a.download = `va430-class-portrait-${P.mode}.png`; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 4000);
+    }, "image/png");
+  });
 
   /* ---------------- 18 · word counts ---------------- */
   const words = s => (s.trim().match(/\S+/g) || []).length;
@@ -1460,7 +1733,11 @@ function sketch(p) {
   if (LIVE_ON) {
     const S = LIVE.session;
     const sb = window.supabase.createClient(LIVE.url, LIVE.key, { auth: { persistSession: false } });
-    const addRating = r => { if (!r || (r.round !== 1 && r.round !== 2)) return; (r.round === 1 ? live.r1 : live.r2).set(r.device, { cool: +r.cool, tense: +r.tense, chaos: +r.chaos, deep: +r.deep }); renderLive(); };
+    const addRating = r => {
+      if (!r || (r.round !== 1 && r.round !== 2)) return;
+      const v = { cool: +r.cool, tense: +r.tense, chaos: +r.chaos, deep: +r.deep };
+      (r.round === 1 ? live.r1 : live.r2).set(r.device, v); logRow(r.round, r.device, v); renderLive();
+    };
     const addWord = w => { if (w && w.word) { live.words.set(w.device, String(w.word).slice(0, 40)); renderLive(); } };
     (async () => {
       const a = await sb.from("va430_ratings").select("round,device,cool,tense,chaos,deep").eq("session", S);

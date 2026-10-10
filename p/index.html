@@ -40,6 +40,17 @@
   .big { font: 800 40px/.95 var(--display); font-stretch: 72%; color: var(--ink); }
   .err { color: var(--warn); font-size: 16px; }
   .spacer { flex: 1; }
+  .mine { display: flex; flex-direction: column; margin-top: 26px; }
+  .mine h2 { font: 700 24px/1.1 var(--display); font-stretch: 85%; margin: 0 0 10px; }
+  .me-row { padding: 12px 0 14px; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 8px; }
+  .me-row .ends { font-size: 18px; color: var(--mute); }
+  .me-track { position: relative; height: 64px; border-bottom: 2px solid var(--mute); margin: 0 6px; }
+  .me-track i { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--ikb); transform: translate(-50%, 50%); }
+  .me-track .you { position: absolute; top: 0; bottom: -10px; border-left: 3px solid var(--ink); }
+  .me-track .you::after { content: ""; position: absolute; bottom: -2px; left: -9px; width: 15px; height: 15px; border-radius: 50%; background: var(--ink); }
+  .me-track .you span { position: absolute; top: -2px; left: 6px; font: 500 12px var(--mono); color: var(--ink); white-space: nowrap; }
+  .me-track .you.flip span { left: auto; right: 9px; }
+  .me-row small { font: 400 13px var(--mono); color: var(--mute); }
   .foot { font: 400 12px/1.5 var(--mono); color: var(--mute); }
 </style>
 </head>
@@ -73,6 +84,10 @@
   <section id="vDone" hidden>
     <p class="big" id="doneText">Thank you.</p>
     <p style="margin-top:14px">Watch the screen.</p>
+    <div class="mine" id="mine" hidden>
+      <h2>You and the class</h2>
+      <div id="mineRows"></div>
+    </div>
   </section>
 
   <section id="vClosed" hidden>
@@ -136,13 +151,48 @@
     el.addEventListener("input", () => { vals[k] = +el.value; el.classList.add("moved"); track(); });
   });
 
+  /* after sending, the phone shows your answer on top of everyone's (same round) */
+  const rounds = { 1: new Map(), 2: new Map() };
+  let ratingsOn = false;
+  function addR(r) {
+    if (!r || !rounds[r.round]) return;
+    rounds[r.round].set(r.device, { cool: +r.cool, tense: +r.tense, chaos: +r.chaos, deep: +r.deep });
+    drawMine();
+  }
+  async function watchRatings() {
+    if (ratingsOn) return; ratingsOn = true;
+    sb.channel("va430-db-" + S)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "va430_ratings", filter: `session=eq.${S}` }, p => addR(p.new))
+      .subscribe();
+    const { data } = await sb.from("va430_ratings").select("round,device,cool,tense,chaos,deep").eq("session", S);
+    (data || []).forEach(addR);
+  }
+  function drawMine() {
+    const r = phase === "r1" ? 1 : phase === "r2" ? 2 : 0;
+    const box = $("#mine");
+    if (!r || $("#vDone").hidden) { box.hidden = true; return; }
+    const all = rounds[r], me = all.get(device) || (() => { try { return JSON.parse(store.get(`va430-mine-${S}-${r}`)); } catch (e) { return null; } })();
+    if (!me) { box.hidden = true; return; }
+    const others = [...all.entries()].filter(([d]) => d !== device).map(([, v]) => v);
+    box.hidden = false;
+    $("#mineRows").innerHTML = AXES.map(([l, h, k]) => {
+      const vs = [...others.map(v => v[k])], bins = new Map();
+      const dots = vs.map(v => { const b = Math.round(v / 4), n = bins.get(b) || 0; bins.set(b, n + 1); return `<i style="left:${v}%; bottom:${Math.min(52, 4 + n * 10)}px"></i>`; }).join("");
+      const everyone = [...vs, me[k]], m = Math.round(everyone.reduce((s, v) => s + v, 0) / everyone.length);
+      const more = vs.filter(v => v > me[k]).length;
+      return `<div class="me-row"><div class="ends"><span>${l}</span><span>${h}</span></div>
+        <div class="me-track">${dots}<span class="you${me[k] > 80 ? " flip" : ""}" style="left:${me[k]}%"><span>you ${me[k]}</span></span></div>
+        <small>class average ${m} · ${vs.length ? `${more} of ${vs.length} others rated it more ${h}` : "you are the first"}</small></div>`;
+    }).join("");
+  }
+
   function render() {
     if (phase === "r1" || phase === "r2") {
-      if (store.get(doneKey(phase))) { $("#doneText").textContent = phase === "r1" ? "Round 1 sent." : "Round 2 sent."; show("vDone"); return; }
+      if (store.get(doneKey(phase))) { $("#doneText").textContent = phase === "r1" ? "Round 1 sent." : "Round 2 sent."; show("vDone"); watchRatings(); drawMine(); return; }
       $("#rateTitle").textContent = phase === "r1" ? "Round 1" : "Round 2";
       show("vRate");
     } else if (phase === "words") {
-      if (store.get(doneKey("words"))) { $("#doneText").textContent = "Word sent."; show("vDone"); return; }
+      if (store.get(doneKey("words"))) { $("#doneText").textContent = "Word sent."; show("vDone"); drawMine(); return; }
       show("vWord");
     } else if (phase === "closed") show("vClosed");
     else show("vWait");
@@ -154,6 +204,7 @@
     const { error } = await sb.from("va430_ratings").insert({ session: S, round: r, device, ...vals });
     btn.disabled = false;
     if (error && error.code !== "23505") { $("#rateErr").textContent = "Could not send. Check your connection and try again."; $("#rateErr").hidden = false; return; }
+    if (!error) store.set(`va430-mine-${S}-${r}`, JSON.stringify(vals));
     store.set(doneKey(phase), "1"); track(); render();
   }
   async function sendWord() {
