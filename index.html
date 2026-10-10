@@ -1,0 +1,1485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<meta charset="utf-8">
+<title>Data and Art</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Layout: a fixed 1920×1080 stage scaled to the window; asymmetric grid, big condensed headlines, museum-label captions. */
+  :root {
+    --paper: #EEF0F2;
+    --paper-2: #E2E5E9;
+    --card: #F8F9FA;
+    --ink: #0F1012;
+    --mute: #5B6068;
+    --rule: #C8CCD2;
+    --ikb: #1F2EFF;
+    --machine: #E8541E;
+    --night: #0F1012;
+    --night-2: #1A1C20;
+    --night-ink: #EEF0F2;
+    --night-mute: #9DA3AC;
+    --night-rule: #2E3238;
+    --ikb-d: #6A75FF;
+    --machine-d: #E5602A;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+    --body: "Archivo", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "Courier New", monospace;
+    color-scheme: light;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: #0B0C0E; color: var(--ink); font-family: var(--body); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  [hidden] { display: none !important; }
+
+  .stage { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 50% 50%; }
+  .slide {
+    position: absolute; inset: 0; box-sizing: border-box; padding: 96px 128px 112px;
+    background: var(--paper); color: var(--ink);
+    display: flex; flex-direction: column; gap: 36px;
+    opacity: 0; visibility: hidden; transition: opacity .45s ease, visibility 0s linear .45s; overflow: hidden;
+  }
+  .slide.active { opacity: 1; visibility: visible; transition: opacity .45s ease; }
+  .slide.dark { background: var(--night); color: var(--night-ink); }
+  [data-step] { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+  [data-step].on { opacity: 1; transform: none; }
+
+  .meta { display: flex; justify-content: space-between; font: 400 22px/1 var(--mono); color: var(--mute); letter-spacing: .02em; }
+  .dark .meta { color: var(--night-mute); }
+  h1, h2, h3, p { margin: 0; }
+  .mega { font: 800 168px/.9 var(--display); font-stretch: 72%; letter-spacing: -.02em; text-wrap: balance; }
+  .title { font: 750 96px/.95 var(--display); font-stretch: 75%; letter-spacing: -.015em; text-wrap: balance; max-width: 1500px; }
+  .statement { font: 750 132px/.92 var(--display); font-stretch: 70%; letter-spacing: -.02em; text-wrap: balance; }
+  .lede { font: 400 44px/1.2 var(--body); color: var(--mute); max-width: 1200px; text-wrap: balance; }
+  .dark .lede { color: var(--night-mute); }
+  .body { font: 400 30px/1.4 var(--body); max-width: 1100px; }
+  .label { font: 400 20px/1.45 var(--mono); color: var(--mute); }
+  .dark .label { color: var(--night-mute); }
+  .mono { font-family: var(--mono); }
+  .accent { color: var(--ikb); }
+  .dark .accent { color: var(--ikb-d); }
+  .spacer { flex: 1; }
+  .src { position: absolute; left: 128px; bottom: 52px; font: 400 18px/1.4 var(--mono); color: var(--mute); max-width: 1300px; }
+  .dark .src { color: var(--night-mute); }
+  a { color: inherit; }
+  .edit { border-bottom: 2px dashed currentColor; outline: none; cursor: text; }
+  .edit:focus { background: rgba(31, 46, 255, .1); }
+  .ph { color: var(--machine); }
+  .dark .ph { color: var(--machine-d); }
+
+  button.chip, .seg button {
+    font: 500 22px/1 var(--mono); color: var(--ink); background: transparent; border: 2px solid var(--ink);
+    padding: 12px 18px; cursor: pointer; border-radius: 0;
+  }
+  .dark button.chip, .dark .seg button { color: var(--night-ink); border-color: var(--night-ink); }
+  button.chip[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .dark button.chip[aria-pressed="true"], .dark .seg button[aria-pressed="true"] { background: var(--night-ink); color: var(--night); }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, .edit:focus-visible { outline: 3px solid var(--ikb); outline-offset: 3px; }
+  .seg { display: inline-flex; }
+  .seg button + button { border-left: 0; }
+
+  /* cover */
+  .cover-grid { display: grid; grid-template-columns: 1fr 820px; gap: 72px; align-items: end; flex: 1; }
+  .cover-fig { margin: 0; display: flex; flex-direction: column; gap: 14px; }
+  .cover-fig canvas { width: 820px; height: 550px; display: block; background: var(--paper-2); }
+  .foot { display: flex; justify-content: space-between; font: 400 26px/1.3 var(--mono); }
+
+  /* hour */
+  .hour { display: flex; width: 1664px; border-top: 3px solid var(--ink); }
+  .hour > div { padding: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; border-left: 3px solid var(--ink); padding-left: 24px; }
+  .hour > div:first-child { border-left: 0; padding-left: 0; }
+  .hour .min { font: 750 120px/.9 var(--display); font-stretch: 70%; }
+  .hour .min small { font: 400 30px var(--mono); margin-left: 6px; }
+  .hour h3 { font: 650 40px/1.05 var(--display); font-stretch: 85%; }
+  .hour p { font: 400 24px/1.35 var(--body); color: var(--mute); }
+
+  /* what is data */
+  .twocol { display: grid; grid-template-columns: 560px 1fr; gap: 80px; align-items: start; flex: 1; }
+  .tomb { background: var(--card); border: 1px solid var(--rule); padding: 32px 36px; font: 400 26px/1.5 var(--body); display: flex; flex-direction: column; gap: 2px; }
+  .tomb .f { transition: background .4s ease, color .4s ease; padding: 0 6px; margin: 0 -6px; }
+  .tomb .f.hl { background: var(--ikb); color: var(--card); }
+  .tomb b { font-weight: 700; }
+  .row-table { width: 100%; border-collapse: collapse; font: 400 22px/1.35 var(--mono); }
+  .row-table th { text-align: left; font-weight: 500; color: var(--mute); padding: 0 18px 10px 0; border-bottom: 2px solid var(--ink); vertical-align: bottom; }
+  .row-table td { padding: 14px 18px 14px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .leftout { display: flex; flex-direction: column; gap: 10px; }
+  .leftout h3 { font: 650 38px/1.1 var(--display); font-stretch: 85%; }
+  .leftout ul { margin: 0; padding-left: 1.1em; font: 400 28px/1.45 var(--body); color: var(--mute); }
+
+  /* morph chart */
+  .morph { display: grid; grid-template-columns: 380px 1fr; gap: 64px; flex: 1; align-items: start; }
+  .morph .modes { display: flex; flex-direction: column; gap: 12px; }
+  .morph .modes button { text-align: left; display: flex; justify-content: space-between; gap: 12px; }
+  .morph .modes button span { color: inherit; opacity: .6; }
+  .morph-cap { font: 400 28px/1.35 var(--body); color: var(--mute); min-height: 80px; }
+  .chartbox { position: relative; }
+  .chartbox svg { display: block; overflow: visible; }
+  .chartbox text { font-family: var(--mono); font-size: 20px; fill: var(--mute); }
+  .chartbox .lbl { fill: var(--ink); font-size: 22px; }
+  .tip { position: absolute; pointer-events: none; transform: translate(-50%, calc(-100% - 14px)); background: var(--ink); color: var(--paper); font: 400 20px/1.4 var(--mono); padding: 10px 12px; white-space: nowrap; z-index: 5; }
+  .dark .tip { background: var(--night-ink); color: var(--night); }
+
+  /* forms */
+  .forms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 3px solid var(--ink); flex: 1; }
+  .form { padding: 26px 32px 22px 0; display: grid; grid-template-columns: 170px 1fr; gap: 24px; border-bottom: 1px solid var(--rule); align-items: start; }
+  .form svg { width: 170px; height: 130px; }
+  .form svg * { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  .form svg .fill { fill: var(--ikb); stroke: none; }
+  .form h3 { font: 700 46px/1 var(--display); font-stretch: 80%; }
+  .form .use { font: 400 24px/1.3 var(--body); color: var(--mute); margin-top: 6px; }
+  .form .ex { font: 400 19px/1.4 var(--mono); margin-top: 12px; }
+  .draw path, .draw line, .draw polyline, .draw circle, .draw rect { stroke-dasharray: 600; stroke-dashoffset: 600; }
+  .slide.active .draw path, .slide.active .draw line, .slide.active .draw polyline, .slide.active .draw circle, .slide.active .draw rect { animation: draw 1.6s ease forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* data art */
+  .artists { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 3px solid var(--night-ink); flex: 1; }
+  .artist { padding: 24px 28px 24px 0; border-bottom: 1px solid var(--night-rule); display: flex; flex-direction: column; gap: 8px; }
+  .artist h3 { font: 700 40px/1 var(--display); font-stretch: 80%; }
+  .artist .work { font: italic 400 26px/1.25 var(--body); color: var(--night-ink); }
+  .artist p { font: 400 21px/1.4 var(--body); color: var(--night-mute); }
+  .artist a { font: 400 18px var(--mono); color: var(--ikb-d); text-decoration: none; margin-top: auto; }
+
+  /* tools map */
+  .toolbar-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .toolmap { display: grid; grid-template-columns: 1180px 1fr; gap: 48px; align-items: start; }
+  .toolmap svg text { font-family: var(--mono); }
+  .toolmap .dotg { cursor: pointer; transition: opacity .35s ease; }
+  .toolmap .dotg.dim { opacity: .15; }
+  .toolcard { border-top: 3px solid var(--ink); padding-top: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .toolcard h3 { font: 800 64px/.92 var(--display); font-stretch: 70%; }
+  .toolcard p { font: 400 26px/1.35 var(--body); }
+  .toolcard .fmts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toolcard .fmts span { font: 400 18px var(--mono); border: 2px solid var(--ink); padding: 5px 9px; }
+  .toolcard .used { font: 400 20px/1.45 var(--mono); color: var(--mute); border-left: 4px solid var(--ikb); padding-left: 12px; }
+
+  /* bloom (p5.js) */
+  .bloomgrid { display: grid; grid-template-columns: 640px 1fr; gap: 48px; flex: 1; align-items: start; min-height: 0; }
+  .codebox { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .codebox pre { margin: 0; background: var(--ink); color: #DCE0E6; font: 400 14px/1.45 var(--mono); padding: 16px 18px; overflow: hidden; white-space: pre; tab-size: 2; }
+  .bloomhost { width: 960px; height: 520px; background: var(--card); border: 1px solid var(--rule); }
+  .bloomhost canvas { display: block; }
+
+  /* context */
+  .ctx { display: grid; grid-template-columns: 700px 1fr; gap: 72px; flex: 1; align-items: start; }
+  .ctxfig { margin: 0; display: flex; flex-direction: column; gap: 14px; }
+  .ctxfig img { width: 700px; max-height: 520px; object-fit: contain; display: block; background: var(--paper-2); }
+  .ctx-ph { width: 700px; height: 460px; border: 3px dashed var(--rule); display: grid; place-items: center; font: 400 26px var(--mono); color: var(--mute); }
+  .ctxlist { list-style: none; margin: 0; padding: 0; border-top: 3px solid var(--ink); }
+  .ctxlist li { display: flex; flex-direction: column; gap: 6px; padding: 18px 0; border-bottom: 1px solid var(--rule); font: 500 38px/1.2 var(--body); }
+  .wordwall { border: 2px dashed var(--rule); min-height: 200px; display: grid; place-items: center; font: 400 22px var(--mono); color: var(--mute); text-align: center; padding: 20px; }
+
+  /* questions */
+  .qs { list-style: none; margin: 0; padding: 0; border-top: 3px solid var(--ink); }
+  .qs li { display: grid; grid-template-columns: 1fr 420px; gap: 40px; padding: 22px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .qs .q { font: 600 46px/1.1 var(--display); font-stretch: 85%; }
+  .qs .d { font: 400 22px/1.4 var(--mono); color: var(--mute); }
+  .qs li.today .q { color: var(--ikb); }
+  .qs li.today .d::before { content: "Today’s exercise · "; color: var(--ikb); }
+
+  /* art data layers */
+  .layers { position: relative; flex: 1; }
+  .layers .core { position: absolute; left: 640px; top: 160px; width: 384px; }
+  .layers .core img { width: 384px; display: block; }
+  .layers .ly { position: absolute; width: 420px; }
+  .layers .ly h3 { font: 700 40px/1 var(--display); font-stretch: 80%; }
+  .layers .ly p { font: 400 23px/1.35 var(--body); color: var(--mute); margin-top: 6px; }
+  .layers svg.links { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .layers svg.links line { stroke: var(--rule); stroke-width: 2; }
+  .becomes { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font: 400 24px var(--mono); }
+  .becomes span.c { border: 2px solid var(--ink); padding: 8px 14px; }
+
+  /* sources */
+  .srcs { width: 100%; border-collapse: collapse; }
+  .srcs th { text-align: left; font: 500 20px/1.3 var(--mono); color: var(--mute); padding: 0 24px 12px 0; border-bottom: 3px solid var(--ink); }
+  .srcs td { padding: 16px 24px 16px 0; border-bottom: 1px solid var(--rule); vertical-align: top; font: 400 23px/1.35 var(--body); }
+  .srcs td:first-child { font: 700 28px/1.1 var(--display); font-stretch: 85%; width: 330px; }
+  .srcs td:first-child small { display: block; font: 400 18px/1.4 var(--mono); color: var(--mute); margin-top: 4px; font-stretch: 100%; }
+  .srcs td:last-child { color: var(--mute); }
+  .keep { font: 750 64px/1 var(--display); font-stretch: 75%; }
+
+  /* evidence */
+  .evidence { display: grid; grid-template-columns: 1fr 760px; gap: 80px; flex: 1; align-items: start; }
+  .panel-h { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 18px; }
+  .panel-h h3 { font: 700 40px/1.05 var(--display); font-stretch: 80%; }
+  .bigfig { font: 800 150px/.85 var(--display); font-stretch: 68%; color: var(--ikb); }
+
+  /* cleaning */
+  .clean { display: grid; grid-template-columns: 1fr 520px; gap: 80px; flex: 1; align-items: start; }
+  .rawlist { list-style: none; margin: 0; padding: 0; border-top: 3px solid var(--ink); font: 400 26px/1 var(--mono); }
+  .rawlist li { display: grid; grid-template-columns: 460px 60px 110px 1fr; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--rule); }
+  .rawlist .arrow, .rawlist .yr, .rawlist .rule { opacity: 0; transition: opacity .4s ease; }
+  .rawlist.parsed .arrow, .rawlist.parsed .yr, .rawlist.parsed .rule { opacity: 1; }
+  .rawlist .yr { font-weight: 500; }
+  .rawlist .rule { font-size: 19px; color: var(--mute); }
+  .rawlist .rule.flag { color: var(--machine); }
+  .rules { display: flex; flex-direction: column; gap: 28px; }
+  .rules div { border-top: 3px solid var(--ink); padding-top: 12px; }
+  .rules h3 { font: 750 52px/1 var(--display); font-stretch: 75%; }
+  .rules p { font: 400 24px/1.35 var(--body); color: var(--mute); margin-top: 8px; }
+  .counts { display: flex; gap: 48px; }
+  .counts div b { display: block; font: 800 88px/.9 var(--display); font-stretch: 70%; }
+  .counts div span { font: 400 21px/1.35 var(--mono); color: var(--mute); }
+
+  /* image analysis */
+  .ana { display: grid; grid-template-columns: 640px 1fr; gap: 56px; flex: 1; align-items: start; }
+  .ana .imgbox { position: relative; }
+  .ana .imgbox img { width: 640px; display: block; }
+  .drop-hint { font: 400 19px var(--mono); color: var(--mute); margin-top: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .drop-hint label { border-bottom: 2px solid currentColor; cursor: pointer; }
+  .drop-hint input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .ana-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+  .ana-col { display: flex; flex-direction: column; gap: 14px; border-top: 3px solid var(--ink); padding-top: 14px; min-width: 0; }
+  .ana-col h3 { font: 700 44px/1 var(--display); font-stretch: 80%; }
+  .ana-col .seg button { font-size: 18px; padding: 9px 11px; }
+  .ana-col canvas { width: 100%; display: block; background: var(--paper-2); }
+  .num { font: 800 84px/.9 var(--display); font-stretch: 70%; font-variant-numeric: tabular-nums; }
+  .num small { font: 400 22px var(--mono); color: var(--mute); margin-left: 8px; }
+  .sw { display: flex; height: 120px; }
+  .sw div { height: 100%; position: relative; }
+  .sw div span { position: absolute; left: 6px; bottom: 6px; font: 400 15px var(--mono); color: #fff; mix-blend-mode: difference; }
+  input[type=range] { accent-color: var(--ikb); width: 100%; }
+  .dark input[type=range] { accent-color: var(--ikb-d); }
+
+  /* cleveland mcgill */
+  .cm { display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; }
+  .cm figure { margin: 0; display: flex; flex-direction: column; gap: 12px; border-top: 3px solid var(--ink); padding-top: 14px; }
+  .cm svg { width: 100%; height: 280px; display: block; }
+  .cm .rank { font: 400 19px/1.3 var(--mono); color: var(--mute); }
+  .cm h3 { font: 700 34px/1 var(--display); font-stretch: 80%; }
+  .reveal { font: 800 92px/.9 var(--display); font-stretch: 70%; color: var(--ikb); }
+
+  /* exercise */
+  .ex-grid { display: grid; grid-template-columns: 820px 1fr; gap: 80px; flex: 1; align-items: start; }
+  .artframe { width: 820px; height: 560px; border: 3px dashed var(--night-mute); display: grid; place-items: center; position: relative; background: var(--night-2); }
+  .artframe img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+  .artframe .ph-text { font: 400 26px/1.4 var(--mono); color: var(--night-mute); text-align: center; padding: 32px; }
+  .artframe.has img { display: block; }
+  .qrbox { width: 300px; height: 300px; border: 3px dashed var(--machine-d); display: grid; place-items: center; font: 400 26px var(--mono); color: var(--machine-d); text-align: center; }
+  .sliders { display: flex; flex-direction: column; gap: 22px; }
+  .sl { display: grid; grid-template-columns: 170px 1fr 170px; align-items: center; gap: 18px; font: 500 24px var(--mono); }
+  .sl span:last-child { text-align: right; }
+  .sl .track { height: 6px; background: var(--night-rule); position: relative; }
+  .sl .track i { position: absolute; top: 50%; width: 30px; height: 30px; border-radius: 50%; background: var(--night-ink); transform: translate(-50%, -50%); }
+
+  /* results */
+  .res { display: flex; flex-direction: column; gap: 30px; flex: 1; }
+  .res-row { display: grid; grid-template-columns: 210px 1fr 210px; gap: 28px; align-items: center; }
+  .res-row .end { font: 500 26px var(--mono); }
+  .res-row .end.r { text-align: right; }
+  .res-track { position: relative; height: 112px; border-bottom: 2px solid var(--night-ink); }
+  .res-track .classzone { position: absolute; inset: 0 0 6px; border: 2px dashed var(--night-rule); display: grid; place-items: center; font: 400 20px var(--mono); color: var(--night-mute); }
+  .res-track .mk { position: absolute; bottom: -14px; width: 26px; height: 26px; background: var(--machine-d); transform: translateX(-50%) rotate(45deg); transition: left .8s ease; box-shadow: 0 0 0 3px var(--night); }
+  .res-track .mkl { position: absolute; bottom: 22px; transform: translateX(-50%); font: 500 20px var(--mono); color: var(--night-ink); white-space: nowrap; transition: left .8s ease; }
+  .res-cap { grid-column: 2; font: 400 18px/1.3 var(--mono); color: var(--night-mute); margin-top: -18px; }
+  .res-track .dots { position: absolute; inset: 0; }
+  .res-track .dots svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--ikb-d); transform: translate(-50%, 50%); transition: left .5s ease, bottom .5s ease; box-shadow: 0 0 0 2px var(--night); }
+  .ghost { position: absolute; top: 4px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--ikb-d); transform: translateX(-50%); transition: left .15s linear; opacity: .8; }
+  .mean { position: absolute; top: 0; bottom: 0; border-left: 3px solid var(--ikb-d); }
+  .mean span { position: absolute; top: 2px; left: 8px; font: 500 20px var(--mono); color: var(--night-ink); white-space: nowrap; }
+  .livechip { position: fixed; left: 14px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20; font: 500 13px var(--mono); background: rgba(15, 16, 18, .78); color: #EEF0F2; padding: 7px 10px; display: flex; gap: 10px; align-items: center; }
+  .livechip i { width: 9px; height: 9px; border-radius: 50%; background: #9DA3AC; display: inline-block; }
+  .livechip.on i { background: #3DDC84; }
+  .livechip b { font-weight: 500; color: #6A75FF; }
+  .wordwall.live { display: flex; flex-wrap: wrap; gap: 6px 18px; align-content: flex-start; place-items: initial; text-align: left; }
+  .wordwall .w { font-family: var(--display); font-stretch: 80%; font-weight: 700; color: var(--ink); cursor: pointer; animation: pop .5s ease both; line-height: 1; }
+  @keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .qrbox svg { width: 100%; height: 100%; display: block; }
+  .qrbox.has { border: 0; background: #EEF0F2; padding: 14px; box-sizing: border-box; }
+  .legend { display: flex; gap: 36px; font: 400 22px var(--mono); align-items: center; }
+  .legend i { display: inline-block; width: 22px; height: 22px; margin-right: 10px; vertical-align: -4px; }
+
+  /* discussion */
+  .disc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; flex: 1; }
+  .disc div { border-top: 3px solid var(--ink); padding-top: 18px; display: flex; flex-direction: column; gap: 18px; }
+  .disc h3 { font: 800 110px/.9 var(--display); font-stretch: 68%; }
+  .disc p { font: 400 36px/1.25 var(--body); }
+
+  /* brief */
+  .flow { display: grid; grid-template-columns: 1fr 80px 1fr 80px 1fr; align-items: start; }
+  .flow .arrow { font: 400 80px/1 var(--display); text-align: center; padding-top: 10px; color: var(--mute); }
+  .flow h3 { font: 800 120px/.9 var(--display); font-stretch: 68%; }
+  .flow p { font: 400 28px/1.35 var(--body); color: var(--mute); margin-top: 14px; }
+  .dates { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 3px solid var(--ink); }
+  .dates div { padding: 20px 28px 0 0; }
+  .dates b { display: block; font: 750 54px/1 var(--display); font-stretch: 75%; }
+  .dates span { font: 400 24px/1.35 var(--body); color: var(--mute); }
+
+  /* paragraph */
+  .para { display: grid; grid-template-columns: 1fr 860px; gap: 72px; flex: 1; align-items: start; }
+  .tpl { font: 400 30px/1.5 var(--body); }
+  .tpl .blank { border-bottom: 3px solid var(--ikb); color: var(--mute); }
+  .example { font: 400 25px/1.5 var(--body); }
+  .example .q { box-shadow: inset 0 -6px 0 rgba(31, 46, 255, .35); }
+  .example .d { box-shadow: inset 0 -6px 0 rgba(232, 84, 30, .35); }
+  .example .f { box-shadow: inset 0 -6px 0 rgba(15, 16, 18, .25); }
+  .wc { font: 400 22px var(--mono); color: var(--mute); display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .wc b { color: var(--ink); font-weight: 500; }
+  textarea#mine { width: 100%; height: 170px; box-sizing: border-box; font: 400 24px/1.4 var(--body); border: 2px solid var(--ink); background: var(--card); color: var(--ink); padding: 14px; resize: none; }
+
+  /* susam forms */
+  .susam { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; flex: 1; }
+  .susam div { border-top: 3px solid var(--ink); padding-top: 16px; display: flex; flex-direction: column; gap: 18px; }
+  .susam h3 { font: 800 76px/.9 var(--display); font-stretch: 68%; }
+  .susam .e { font: 400 23px/1.4 var(--body); }
+  .susam .e i { font-style: italic; }
+  .susam .e small { display: block; font: 400 18px/1.4 var(--mono); color: var(--mute); margin-top: 4px; }
+
+  /* kit */
+  .kit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; flex: 1; }
+  .kit div { border-top: 3px solid var(--ink); padding-top: 16px; }
+  .kit h3 { font: 800 76px/.9 var(--display); font-stretch: 68%; margin-bottom: 18px; }
+  .kit ul { list-style: none; margin: 0; padding: 0; font: 400 27px/1.55 var(--body); }
+  .kit ul small { font: 400 18px var(--mono); color: var(--mute); }
+
+  /* chrome */
+  .progress { position: fixed; left: 0; top: 0; height: 4px; background: var(--ikb); transition: width .3s ease; z-index: 20; }
+  .bar { position: fixed; right: 14px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 6px; align-items: center; z-index: 20; font: 400 13px var(--mono); }
+  .bar button { font: 500 13px var(--mono); background: rgba(15, 16, 18, .72); color: #EEF0F2; border: 1px solid rgba(238, 240, 242, .25); padding: 7px 10px; cursor: pointer; border-radius: 0; }
+  .bar .count { background: rgba(15, 16, 18, .72); color: #EEF0F2; padding: 7px 10px; font-variant-numeric: tabular-nums; }
+  .notes { display: none; }
+  .notes-panel {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(56px + env(safe-area-inset-bottom, 0px)); width: min(980px, calc(100% - 32px)); box-sizing: border-box;
+    background: rgba(15, 16, 18, .94); color: #EEF0F2; padding: 18px 22px; font: 400 17px/1.5 Archivo, Arial, sans-serif; z-index: 21; border-left: 4px solid #6A75FF;
+  }
+  .notes-panel b { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #9DA3AC; display: block; margin-bottom: 6px; }
+  .dropping .stage::after { content: "Drop the image"; position: absolute; inset: 40px; border: 6px dashed var(--ikb); display: grid; place-items: center; font: 750 96px var(--display); color: var(--ikb); background: rgba(238, 240, 242, .85); pointer-events: none; z-index: 30; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } .draw * { stroke-dashoffset: 0 !important; } }
+</style>
+
+<div class="progress" id="progress"></div>
+<main class="stage" id="stage">
+
+  <!-- 1 · Cover -->
+  <section class="slide" data-part="Opening">
+    <div class="meta"><span>VA430 / VA530 · Art Analysis · Fall 2026</span><span>Midterm session</span></div>
+    <div class="cover-grid">
+      <div style="display:flex; flex-direction:column; gap:36px">
+        <h1 class="mega">How does an artwork become data?</h1>
+        <p class="lede">And what do the numbers leave out?</p>
+      </div>
+      <figure class="cover-fig">
+        <canvas id="coverCanvas" width="1640" height="1100" aria-label="Seurat's painting turning into dots, pixels and numbers"></canvas>
+        <figcaption class="label">Georges Seurat, <i>A Sunday on La Grande Jatte — 1884</i>, 1884–86. Art Institute of Chicago, 1926.224. Public domain.</figcaption>
+      </figure>
+    </div>
+    <div class="foot"><span class="edit" contenteditable="plaintext-only" data-edit="date" spellcheck="false">[Date]</span><span><span class="edit" contenteditable="plaintext-only" data-edit="ta" spellcheck="false">[TA name]</span> with Kerem Ozan Bayraktar</span></div>
+    <aside class="notes">Seurat built this painting from dots; a computer reads it as dots too, but as numbers. Today is about that translation and what it loses.</aside>
+  </section>
+
+  <!-- 2 · The hour -->
+  <section class="slide" data-part="Opening">
+    <div class="meta"><span>The hour</span><span>60 minutes</span></div>
+    <h2 class="title">Four parts, one hour.</h2>
+    <div class="spacer"></div>
+    <div class="hour">
+      <div style="width:21.7%"><span class="min">13<small>min</small></span><h3>Data, visualization, tools</h3><p>What data is, what a chart does, who makes data art, and with what</p></div>
+      <div style="width:25%"><span class="min">15<small>min</small></span><h3>Art data</h3><p>Questions, sources, cleaning, images as numbers, how the eye reads</p></div>
+      <div style="width:36.6%"><span class="min">22<small>min</small></span><h3>Live exercise, two rounds</h3><p>You rate one painting, hear its context, rate it again; we compare you with a machine; discussion with Kerem</p></div>
+      <div style="width:16.7%"><span class="min">10<small>min</small></span><h3>Midterm</h3><p>Brief, the 150-word paragraph, forms for SUSAM</p></div>
+    </div>
+    <div class="spacer"></div>
+    <aside class="notes">The bar widths are the minutes, so this slide is already a chart. Phones out only for part three.</aside>
+  </section>
+
+  <!-- 3 · What is data -->
+  <section class="slide" data-part="1 · Data and visualization" data-hook="data">
+    <div class="meta"><span>1 · Data and visualization</span><span>What is data?</span></div>
+    <h2 class="title">Data is a record of an observation.</h2>
+    <p class="lede">Someone looked, decided what mattered, and wrote it down.</p>
+    <div class="twocol">
+      <div class="tomb" aria-label="Museum label">
+        <span class="f" data-f="0"><b>Georges Seurat</b></span>
+        <span class="f" data-f="1">French, 1859–1891</span>
+        <span class="f" data-f="2"><i>A Sunday on La Grande Jatte — 1884</i></span>
+        <span class="f" data-f="3">1884–86, border added 1888–89</span>
+        <span class="f" data-f="4">Oil on canvas</span>
+        <span class="f" data-f="5">207.5 × 308.1 cm</span>
+        <span class="f" data-f="6">Helen Birch Bartlett Memorial Collection, 1926.224</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:48px">
+        <table class="row-table" data-step="1">
+          <tr><th>artist</th><th>born–died</th><th>title</th><th>date</th><th>medium</th><th>h × w (cm)</th><th>id</th></tr>
+          <tr><td>Georges Seurat</td><td>1859–1891</td><td>A Sunday on La Grande Jatte — 1884</td><td>1884–86</td><td>Oil on canvas</td><td>207.5 × 308.1</td><td>1926.224</td></tr>
+        </table>
+        <div class="leftout" data-step="2">
+          <h3>What the row cannot hold</h3>
+          <ul>
+            <li>standing in front of it, three metres wide</li>
+            <li>two years of placing dots, and the border added later</li>
+            <li>who the people on the island were</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="src">Label: Art Institute of Chicago collection record, via its public API.</p>
+    <aside class="notes">Read the label, then press next: the same facts become a row. Johanna Drucker suggests calling data “capta”, what is taken, and the third step is what the taking leaves behind.</aside>
+  </section>
+
+  <!-- 4 · What is visualization -->
+  <section class="slide" data-part="1 · Data and visualization" data-hook="morph">
+    <div class="meta"><span>1 · Data and visualization</span><span>What is a visualization?</span></div>
+    <h2 class="title">A visualization maps data to marks and channels.</h2>
+    <div class="morph">
+      <div style="display:flex; flex-direction:column; gap:28px">
+        <div class="modes" id="morphModes">
+          <button type="button" class="chip" data-mode="bar" aria-pressed="true">Length <span>bars</span></button>
+          <button type="button" class="chip" data-mode="dot" aria-pressed="false">Position <span>dots</span></button>
+          <button type="button" class="chip" data-mode="line" aria-pressed="false">Slope <span>line</span></button>
+          <button type="button" class="chip" data-mode="area" aria-pressed="false">Area <span>circles</span></button>
+          <button type="button" class="chip" data-mode="color" aria-pressed="false">Color <span>strip</span></button>
+        </div>
+        <p class="morph-cap" id="morphCap"></p>
+      </div>
+      <div>
+        <p class="label" style="margin-bottom:10px">Share of works by women among MoMA’s acquisitions, by decade (%)</p>
+        <div class="chartbox" id="morphBox"><svg id="morphSvg" width="1100" height="560" viewBox="0 0 1100 560"></svg><div class="tip" hidden></div></div>
+      </div>
+    </div>
+    <p class="src">Data: MoMA Collection (GitHub, CC0), 160,700 records; first listed artist with a recorded gender. 2020s = 2020–2026.</p>
+    <aside class="notes">Same ten numbers, five encodings; click through and ask which one lets you compare 1960 with 1990. Keep the dip in the 1960s in mind, we come back to it.</aside>
+  </section>
+
+  <!-- 5 · Basic forms -->
+  <section class="slide" data-part="1 · Data and visualization">
+    <div class="meta"><span>1 · Data and visualization</span><span>Basic forms</span></div>
+    <h2 class="title">Six forms, all older than computers.</h2>
+    <div class="forms">
+      <div class="form"><svg class="draw" viewBox="0 0 170 130"><line x1="10" y1="120" x2="160" y2="120"/><rect x="22" y="40" width="22" height="80"/><rect x="62" y="70" width="22" height="50"/><rect x="102" y="20" width="22" height="100"/><rect x="142" y="90" width="14" height="30"/></svg><div><h3>Bars</h3><p class="use">compare amounts</p><p class="ex">W. E. B. Du Bois and students, Paris, 1900</p></div></div>
+      <div class="form"><svg class="draw" viewBox="0 0 170 130"><line x1="10" y1="25" x2="110" y2="25"/><line x1="40" y1="50" x2="150" y2="50"/><line x1="20" y1="75" x2="80" y2="75"/><line x1="70" y1="100" x2="160" y2="100"/></svg><div><h3>Timeline</h3><p class="use">show lives and periods</p><p class="ex">Joseph Priestley, A Chart of Biography, 1765</p></div></div>
+      <div class="form"><svg class="draw" viewBox="0 0 170 130"><path d="M85 65 L85 10 A55 55 0 0 1 130 40 Z"/><path d="M85 65 L140 65 A55 55 0 0 1 120 105 Z"/><path d="M85 65 L85 95 A30 30 0 0 1 60 80 Z"/><path d="M85 65 L45 45 A45 45 0 0 1 85 20 Z"/></svg><div><h3>Polar area</h3><p class="use">parts of a whole over time</p><p class="ex">Florence Nightingale, 1858</p></div></div>
+      <div class="form"><svg class="draw" viewBox="0 0 170 130"><path d="M10 40 C 60 40, 70 30, 160 34"/><path d="M10 80 C 60 78, 80 50, 160 44"/><line x1="10" y1="40" x2="10" y2="80"/></svg><div><h3>Flow</h3><p class="use">movement and loss</p><p class="ex">Charles Joseph Minard, 1869</p></div></div>
+      <div class="form"><svg class="draw" viewBox="0 0 170 130"><line x1="30" y1="30" x2="90" y2="60"/><line x1="90" y1="60" x2="145" y2="25"/><line x1="90" y1="60" x2="60" y2="110"/><line x1="90" y1="60" x2="140" y2="105"/><line x1="30" y1="30" x2="60" y2="110"/><circle cx="30" cy="30" r="9"/><circle cx="90" cy="60" r="12"/><circle cx="145" cy="25" r="8"/><circle cx="60" cy="110" r="9"/><circle cx="140" cy="105" r="8"/></svg><div><h3>Network</h3><p class="use">who is connected to whom</p><p class="ex">Alfred H. Barr Jr., 1936; Mark Lombardi, 1990s</p></div></div>
+      <div class="form"><svg class="draw" viewBox="0 0 170 130"><line x1="85" y1="120" x2="85" y2="70"/><line x1="85" y1="70" x2="40" y2="40"/><line x1="85" y1="70" x2="130" y2="40"/><line x1="40" y1="40" x2="20" y2="12"/><line x1="40" y1="40" x2="58" y2="12"/><line x1="130" y1="40" x2="112" y2="12"/><line x1="130" y1="40" x2="150" y2="12"/></svg><div><h3>Tree</h3><p class="use">order knowledge into branches</p><p class="ex">Diderot and d’Alembert, Encyclopédie, 1751</p></div></div>
+    </div>
+    <aside class="notes">These are the examples from Kerem’s file, sorted by the form they use. Any of these forms can carry your midterm.</aside>
+  </section>
+
+  <!-- 6 · Data art -->
+  <section class="slide dark" data-part="1 · Data and visualization">
+    <div class="meta"><span>1 · Data and visualization</span><span>Beyond the chart</span></div>
+    <h2 class="title">When the chart becomes the work.</h2>
+    <div class="artists">
+      <div class="artist"><h3>Federica Fragapane</h3><span class="work">The Stories Behind a Line, 2018</span><p>The routes of six asylum seekers to Italy, drawn as delicate lines with their own stories.</p></div>
+      <div class="artist"><h3>Giorgia Lupi &amp; Stefanie Posavec</h3><span class="work">Dear Data, 2014–15</span><p>A year of weekly hand-drawn postcards about their own small data, sent between New York and London.</p><a href="https://www.dear-data.com/" target="_blank" rel="noopener">dear-data.com ↗</a></div>
+      <div class="artist"><h3>Nadieh Bremer &amp; Shirley Wu</h3><span class="work">Data Sketches, from 2016</span><p>Monthly experiments in custom, hand-coded visualization; later a book with the process behind each one.</p><a href="https://www.datasketch.es/" target="_blank" rel="noopener">datasketch.es ↗</a></div>
+      <div class="artist"><h3>Lev Manovich, Moritz Stefaner et al.</h3><span class="work">Selfiecity, 2014</span><p>3,200 Instagram selfies from five cities, sorted and plotted by pose, mood and face.</p><a href="https://selfiecity.net/" target="_blank" rel="noopener">selfiecity.net ↗</a></div>
+      <div class="artist"><h3>Aaron Koblin</h3><span class="work">The Sheep Market, 2006</span><p>10,000 sheep drawn by Amazon Mechanical Turk workers, each paid $0.02 to “draw a sheep facing to the left”.</p><a href="http://www.thesheepmarket.com/" target="_blank" rel="noopener">thesheepmarket.com ↗</a></div>
+      <div class="artist"><h3>Refik Anadol</h3><span class="work">Unsupervised, MoMA, 2022–23</span><p>A machine learning model trained on MoMA’s collection data, shown as a moving image in the museum’s lobby.</p><a href="https://refikanadol.com/works/unsupervised/" target="_blank" rel="noopener">refikanadol.com ↗</a></div>
+      <div class="artist"><h3>Nathalie Miebach</h3><span class="work">Weather sculptures</span><p>Storm and weather data translated into hand-built sculptural objects.</p><a href="https://www.nathaliemiebach.com/" target="_blank" rel="noopener">nathaliemiebach.com ↗</a></div>
+      <div class="artist"><h3>Burak Arıkan</h3><span class="work">Networks of Dispossession, 2013</span><p>Maps of capital and power in Istanbul, made collectively on Graph Commons for the 13th Istanbul Biennial.</p><a href="https://graphcommons.com/" target="_blank" rel="noopener">graphcommons.com ↗</a></div>
+    </div>
+    <aside class="notes">Open one or two of these live; Selfiecity and The Sheep Market load fast. Notice the range: hand drawing, code, crowdsourced labor, machine learning, objects.</aside>
+  </section>
+
+  <!-- 7 · Tools map -->
+  <section class="slide" data-part="1 · Data and visualization" data-hook="tools">
+    <div class="meta"><span>1 · Data and visualization</span><span>Tools</span></div>
+    <h2 class="title">What do people make it with?</h2>
+    <div class="toolbar-row">
+      <span class="label">I want to make a</span>
+      <div class="seg" id="toolSeg">
+        <button type="button" data-f="all" aria-pressed="true">anything</button>
+        <button type="button" data-f="print" aria-pressed="false">print</button>
+        <button type="button" data-f="screen" aria-pressed="false">screen</button>
+        <button type="button" data-f="object" aria-pressed="false">object</button>
+        <button type="button" data-f="drawing" aria-pressed="false">drawing</button>
+      </div>
+    </div>
+    <div class="toolmap">
+      <div class="chartbox"><svg id="toolSvg" width="1180" height="560" viewBox="0 0 1180 560" role="img" aria-label="Map of data visualization tools by how much code they need and how custom their forms are"></svg></div>
+      <aside class="toolcard" id="toolCard" aria-live="polite"></aside>
+    </div>
+    <p class="src">Positions are a rough judgment from practice, not measured data. Click a tool.</p>
+    <aside class="notes">Left is no code, right is a lot; bottom is standard charts, top is custom forms. Filter by the SUSAM format you have in mind, and notice that pencil and paper sit in the top left.</aside>
+  </section>
+
+  <!-- 8 · Chart to artwork -->
+  <section class="slide" data-part="1 · Data and visualization" data-hook="bloom">
+    <div class="meta"><span>1 · Data and visualization</span><span>p5.js, live</span></div>
+    <h2 class="title">From chart to artwork.</h2>
+    <div class="bloomgrid">
+      <div class="codebox"><p class="label">This code is running on the right (p5.js)</p><pre id="bloomCode"></pre></div>
+      <div style="display:flex; flex-direction:column; gap:18px; min-width:0">
+        <div class="toolbar-row">
+          <div class="seg" id="bloomSeg"><button type="button" data-m="chart" aria-pressed="false">Chart</button><button type="button" data-m="art" aria-pressed="true">Artwork</button></div>
+          <label class="label" for="hand" style="display:flex; gap:14px; align-items:center; flex:1">hand <input id="hand" type="range" min="0" max="1" step="0.05" value="0.35" style="max-width:320px"></label>
+        </div>
+        <div id="bloomHost" class="bloomhost"></div>
+        <p class="label" id="bloomCap">Each bloom is a decade of MoMA acquisitions. Size: works acquired. 100 strokes = 100%. Blue strokes: share by women.</p>
+      </div>
+    </div>
+    <p class="src">Data: MoMA Collection (GitHub, CC0). The 1960s bloom is huge because of the Mies van der Rohe Archive.</p>
+    <aside class="notes">Same numbers as the bar chart a few slides ago; switch Chart and Artwork back and forth. The artwork is less precise and more memorable, and that trade-off is your choice to make.</aside>
+  </section>
+
+  <!-- 7 · Question first -->
+  <section class="slide" data-part="2 · Art data">
+    <div class="meta"><span>2 · Art data</span><span>Start here</span></div>
+    <h2 class="title">Start with a question you cannot answer yet.</h2>
+    <ul class="qs">
+      <li class="today" data-step="1"><span class="q">Do viewers agree on whether a painting is calm or tense?</span><span class="d">data: a survey of this room</span></li>
+      <li data-step="2"><span class="q">Has MoMA collected more work by women since 1989?</span><span class="d">data: MoMA collection, GitHub</span></li>
+      <li data-step="2"><span class="q">Where do Istanbul Biennial artists come from, and has that changed?</span><span class="d">data: İKSV biennial archive, by hand</span></li>
+      <li data-step="2"><span class="q">Which museums are visible in the open data that trains AI?</span><span class="d">data: Wikidata</span></li>
+      <li data-step="2"><span class="q">How do different museums label the same artist?</span><span class="d">data: wall labels you photograph</span></li>
+    </ul>
+    <aside class="notes">A good question names what you would count or compare. The first one is the one we will answer together in twenty minutes.</aside>
+  </section>
+
+  <!-- 8 · What is art data -->
+  <section class="slide" data-part="2 · Art data">
+    <div class="meta"><span>2 · Art data</span><span>What is art data?</span></div>
+    <h2 class="title">Art data is more than metadata.</h2>
+    <div class="layers">
+      <svg class="links" viewBox="0 0 1664 640" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="640" y1="230" x2="420" y2="70"/><line x1="640" y1="330" x2="420" y2="300"/><line x1="640" y1="400" x2="420" y2="530"/>
+        <line x1="1024" y1="230" x2="1240" y2="70"/><line x1="1024" y1="330" x2="1240" y2="300"/><line x1="1024" y1="400" x2="1240" y2="530"/>
+      </svg>
+      <div class="core"><img src="img/seurat.jpg" alt="Seurat, A Sunday on La Grande Jatte"></div>
+      <div class="ly" style="left:0; top:20px" data-step="1"><h3>Metadata</h3><p>who, when, where, what it is made of</p></div>
+      <div class="ly" style="left:0; top:250px" data-step="1"><h3>Pixels</h3><p>color, light, edges of a photograph of the work</p></div>
+      <div class="ly" style="left:0; top:480px" data-step="1"><h3>Text</h3><p>wall labels, reviews, catalogues, interviews</p></div>
+      <div class="ly" style="left:1244px; top:20px" data-step="2"><h3>People</h3><p>artists, dealers, collectors, curators and their networks</p></div>
+      <div class="ly" style="left:1244px; top:250px" data-step="2"><h3>Market</h3><p>sales, prices, auction records</p></div>
+      <div class="ly" style="left:1244px; top:480px" data-step="2"><h3>Audience</h3><p>visits, reactions, your own survey</p></div>
+    </div>
+    <div class="becomes" data-step="3"><span>It can become</span><span class="c">a chart</span><span class="c">a map</span><span class="c">a network</span><span class="c">an image plot</span><span class="c">an object</span><span class="c">a drawing</span><span class="c">a sound</span></div>
+    <aside class="notes">Most datasets you find are the left column; the right column is usually something you collect yourself. Pick the layer that fits your question.</aside>
+  </section>
+
+  <!-- 9 · Where to find it -->
+  <section class="slide" data-part="2 · Art data">
+    <div class="meta"><span>2 · Art data</span><span>Sources</span></div>
+    <h2 class="title">Where to find art data.</h2>
+    <table class="srcs">
+      <tr><th>Source</th><th>What you get</th><th>Watch out</th></tr>
+      <tr><td>MoMA collection<small>github.com/MuseumofModernArt</small></td><td>160,700 works as CSV: artist, nationality, gender, dates, acquisition year</td><td>MoMA says much of it is “not curatorially approved”. One archive is 10% of all rows.</td></tr>
+      <tr><td>Met Open Access<small>CSV on GitHub + Collection API</small></td><td>Objects with culture, period, tags; public-domain images</td><td>A very large file; “culture” and “period” mix very different kinds of category.</td></tr>
+      <tr><td>Art Institute of Chicago<small>api.artic.edu</small></td><td>About 133,000 works, styles, dominant colors, IIIF images</td><td>Style labels are inconsistent: “19th century” and “nineteenth century” both exist.</td></tr>
+      <tr><td>Rijksmuseum<small>data.rijksmuseum.nl</small></td><td>Collection data and images through its data services</td><td>Read the current access rules and licenses before you build on it.</td></tr>
+      <tr><td>Wikidata<small>query.wikidata.org</small></td><td>Artists, works, places and movements linked together; download as CSV</td><td>Written by volunteers; coverage is very uneven between museums.</td></tr>
+      <tr><td>Your own survey<small>Google Forms, a notebook</small></td><td>Exactly the question you want to ask</td><td>Small and shaped by who answers. Do not collect names you do not need.</td></tr>
+    </table>
+    <p class="keep" data-step="1">Every collection is a record of what someone chose to keep.</p>
+    <aside class="notes">All of these are free; the first four are museums describing themselves. The last row is the most underrated source for a midterm.</aside>
+  </section>
+
+  <!-- 10 · Evidence -->
+  <section class="slide" data-part="2 · Art data" data-hook="evidence">
+    <div class="meta"><span>2 · Art data</span><span>Who is in the data</span></div>
+    <h2 class="title">Who is in the data decides what the chart can say.</h2>
+    <div class="evidence">
+      <div>
+        <div class="panel-h"><h3>Artworks linked to each museum in Wikidata</h3><div class="seg" id="scaleSeg"><button type="button" data-scale="lin" aria-pressed="true">Linear</button><button type="button" data-scale="log" aria-pressed="false">Log</button></div></div>
+        <div class="chartbox" id="musBox"><svg id="musSvg" width="900" height="470" viewBox="0 0 900 470"></svg><div class="tip" hidden></div></div>
+      </div>
+      <div>
+        <div class="panel-h"><h3>Tate’s collection records</h3></div>
+        <div style="display:flex; gap:40px; align-items:start">
+          <svg id="waffle" width="330" height="330" viewBox="0 0 330 330" aria-label="57 of 100 squares are Turner"></svg>
+          <div style="display:flex; flex-direction:column; gap:14px">
+            <span class="bigfig">57%</span>
+            <p class="body" style="font-size:26px">by one artist: J. M. W. Turner. In 1856, 37,711 of his works arrived at once.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="src">Wikidata query, 26 September 2026 (collection or location; 5 of the Istanbul museum’s 8 records are works). Tate Collection data (CC0), 69,201 records, 39,389 by Turner.</p>
+    <aside class="notes">On a linear scale the Istanbul museums disappear; switch to log and they appear, which is also a choice. A model trained on this kind of data has never seen them.</aside>
+  </section>
+
+  <!-- 11 · Cleaning -->
+  <section class="slide" data-part="2 · Art data" data-hook="clean">
+    <div class="meta"><span>2 · Art data</span><span>Cleaning</span></div>
+    <span data-step="1" hidden></span>
+    <h2 class="title">Metadata is an interpretation.</h2>
+    <div class="clean">
+      <div style="display:flex; flex-direction:column; gap:30px">
+        <p class="label">Real “Date” values from a random sample of 3,000 MoMA records → a rule that keeps the first year</p>
+        <ul class="rawlist" id="rawlist">
+          <li><span>(c. 1915)</span><span class="arrow">→</span><span class="yr">1915</span><span class="rule">circa</span></li>
+          <li><span>early 1930s</span><span class="arrow">→</span><span class="yr">1930</span><span class="rule flag">a decade, not a year</span></li>
+          <li><span>1884-86</span><span class="arrow">→</span><span class="yr">1884</span><span class="rule">range, hyphen</span></li>
+          <li><span>1962–66</span><span class="arrow">→</span><span class="yr">1962</span><span class="rule">range, en dash</span></li>
+          <li><span>1953—1956</span><span class="arrow">→</span><span class="yr">1953</span><span class="rule">range, em dash</span></li>
+          <li><span>1971 (printed 2014)</span><span class="arrow">→</span><span class="yr">1971</span><span class="rule">made vs printed</span></li>
+          <li><span>Published 1926 (frottage 1925)</span><span class="arrow">→</span><span class="yr">1926</span><span class="rule flag">rule picks publication</span></li>
+          <li><span>Before 1899</span><span class="arrow">→</span><span class="yr">1899</span><span class="rule flag">only an upper limit</span></li>
+          <li><span>n.d.</span><span class="arrow">→</span><span class="yr">—</span><span class="rule flag">no date</span></li>
+        </ul>
+        <div class="counts" data-step="2">
+          <div><b>633</b><span>of 3,000 dates are not a plain year</span></div>
+          <div><b>3</b><span>different dash characters</span></div>
+          <div><b>46</b><span>“Unidentified photographer”, plus 9 “Unknown artist”</span></div>
+        </div>
+      </div>
+      <div class="rules" data-step="3">
+        <div><h3>Keep the raw column.</h3><p>Never overwrite what the museum wrote.</p></div>
+        <div><h3>Log every decision.</h3><p>“First year in the text” is a rule you chose, write it down.</p></div>
+        <div><h3>Count what you drop.</h3><p>The rows you cannot use are part of the result.</p></div>
+      </div>
+    </div>
+    <aside class="notes">First press shows what a simple rule does to each value; look at the orange ones, where the rule quietly changes the meaning. Then the three habits.</aside>
+  </section>
+
+  <!-- 12 · Image to numbers -->
+  <section class="slide" data-part="2 · Art data" data-hook="analysis">
+    <div class="meta"><span>2 · Art data</span><span>Images as numbers</span></div>
+    <h2 class="title">Same image, three methods, different numbers.</h2>
+    <div class="ana">
+      <div class="imgbox">
+        <img id="anaImg" src="img/seurat.jpg" alt="Image being analysed">
+        <p class="drop-hint"><span id="anaName">Seurat, A Sunday on La Grande Jatte</span><label for="anaFile">Use another image</label><input id="anaFile" type="file" accept="image/*"><span>or drop one on this slide</span></p>
+      </div>
+      <div class="ana-cols">
+        <div class="ana-col">
+          <h3>Color</h3>
+          <div class="seg" id="colorSeg"><button type="button" data-c="mean" aria-pressed="true">Average</button><button type="button" data-c="pal" aria-pressed="false">Palette</button><button type="button" data-c="hue" aria-pressed="false">Hues</button></div>
+          <div id="colorOut"></div>
+          <p class="label" id="colorCap"></p>
+        </div>
+        <div class="ana-col">
+          <h3>Light</h3>
+          <canvas id="lumaCv" width="600" height="300"></canvas>
+          <div class="num" id="lumaNum">–</div>
+          <p class="label" id="lumaCap">mean brightness, 0 black · 100 white</p>
+        </div>
+        <div class="ana-col">
+          <h3>Structure</h3>
+          <canvas id="edgeCv" width="600" height="400"></canvas>
+          <label class="label" for="thr">edge threshold <span id="thrVal">120</span></label>
+          <input id="thr" type="range" min="20" max="400" step="10" value="120">
+          <div class="num" id="edgeNum">–</div>
+          <p class="label">of pixels count as an edge</p>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">Average color says this painting is a muddy green; the palette says orange, blue and green; neither is wrong. Move the threshold and the “amount of structure” changes with a single choice.</aside>
+  </section>
+
+  <!-- 13 · Cleveland & McGill -->
+  <section class="slide" data-part="2 · Art data" data-hook="cm">
+    <div class="meta"><span>2 · Art data</span><span>How the eye reads</span></div>
+    <h2 class="title">A chart is a claim.</h2>
+    <p class="lede" style="font-size:36px">Guess: what percent of <span class="accent">A (blue)</span> is <span style="color:var(--machine)">B (orange)</span>? The same two values, five ways.</p>
+    <div class="cm" id="cmGrid"></div>
+    <div style="display:flex; gap:40px; align-items:center">
+      <p class="reveal" data-step="1" id="cmReveal">B = –% of A</p>
+      <button type="button" class="chip" id="cmNew">New pair</button>
+    </div>
+    <p class="src">Ranking from William S. Cleveland and Robert McGill, “Graphical Perception”, Journal of the American Statistical Association, 1984.</p>
+    <aside class="notes">Ask the room to shout a number for each panel, then reveal. Cleveland and McGill found people judge position most accurately and color least, so put your main comparison on position.</aside>
+  </section>
+
+  <!-- 14 · Live exercise -->
+  <section class="slide dark" data-part="3 · Live exercise" data-hook="exercise" data-phase="r1">
+    <div class="meta"><span>3 · Live exercise</span><span>Your turn</span></div>
+    <h2 class="title">Rate one painting.</h2>
+    <div class="ex-grid">
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div class="artframe" id="artframe">
+          <img id="exImg" alt="Exercise artwork" hidden>
+          <div class="ph-text" id="exPh">[Artwork for the live exercise]<br>Drop the image here, or <label for="exFile" style="border-bottom:2px solid currentColor; cursor:pointer">choose a file</label></div>
+          <input id="exFile" type="file" accept="image/*" style="position:absolute; width:1px; height:1px; opacity:0">
+        </div>
+        <p class="label"><span class="edit" contenteditable="plaintext-only" data-edit="tomb" spellcheck="false">[Artist, Title, Date. Collection. Credit]</span></p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:36px">
+        <div style="display:flex; gap:32px; align-items:end">
+          <div class="qrbox" data-qr>[QR code]</div>
+          <div style="display:flex; flex-direction:column; gap:12px">
+            <p class="label">or open</p>
+            <p style="font: 500 34px var(--mono)"><span class="edit ph" contenteditable="plaintext-only" data-edit="link" spellcheck="false">[short link]</span></p>
+            <p class="label">No names. Two minutes.</p>
+          </div>
+        </div>
+        <div class="sliders" aria-label="The four sliders on your phone">
+          <div class="sl"><span>warm</span><span class="track"><i style="left:50%"></i></span><span>cool</span></div>
+          <div class="sl"><span>calm</span><span class="track"><i style="left:50%"></i></span><span>tense</span></div>
+          <div class="sl"><span>ordered</span><span class="track"><i style="left:50%"></i></span><span>chaotic</span></div>
+          <div class="sl"><span>flat</span><span class="track"><i style="left:50%"></i></span><span>deep</span></div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">Scan, look at the painting for thirty seconds, then move four sliders; nobody sees who answered what. While they rate, the next slide computes the machine’s answer from the same image.</aside>
+  </section>
+
+  <!-- 15 · Results -->
+  <section class="slide dark" data-part="3 · Live exercise" data-hook="results">
+    <div class="meta"><span>3 · Live exercise</span><span>Class vs. machine</span></div>
+    <h2 class="title">The gap is not an error. It is the discussion.</h2>
+    <div class="legend"><span><i style="background:var(--ikb-d)"></i>Class (live)</span><span><i style="background:var(--machine-d); transform:rotate(45deg) scale(.8)"></i>Machine estimate</span><span class="label" id="resNote"></span></div>
+    <div class="res" id="res"></div>
+    <aside class="notes">The diamond is computed from pixels only, and each row says how; the dashed area is where the class’s live distribution goes. Ask: on which axis are we furthest from the machine, and on which do we disagree most with each other?</aside>
+  </section>
+
+  <!-- 18 · Context -->
+  <section class="slide" data-part="3 · Live exercise">
+    <div class="meta"><span>3 · Live exercise</span><span>With Kerem</span></div>
+    <h2 class="title">Now, the context.</h2>
+    <div class="ctx">
+      <figure class="ctxfig"><img id="ctxImg" alt="Exercise artwork" hidden><div class="ctx-ph" id="ctxPh">[Exercise artwork]</div><figcaption class="label"><span class="edit" contenteditable="plaintext-only" data-edit="tomb" spellcheck="false">[Artist, Title, Date. Collection. Credit]</span></figcaption></figure>
+      <ul class="ctxlist">
+        <li><span class="label">who made it, and how</span><span class="edit ph" contenteditable="plaintext-only" data-edit="ctx1" spellcheck="false">[Kerem]</span></li>
+        <li><span class="label">when, where, for whom</span><span class="edit ph" contenteditable="plaintext-only" data-edit="ctx2" spellcheck="false">[Kerem]</span></li>
+        <li><span class="label">what happened to it</span><span class="edit ph" contenteditable="plaintext-only" data-edit="ctx3" spellcheck="false">[Kerem]</span></li>
+        <li><span class="label">what the image alone does not show</span><span class="edit ph" contenteditable="plaintext-only" data-edit="ctx4" spellcheck="false">[Kerem]</span></li>
+      </ul>
+    </div>
+    <aside class="notes">Kerem gives three minutes of context about the work: the artist, the period, the story. Then everyone rates it again with the same link.</aside>
+  </section>
+
+  <!-- 19 · Round 2 -->
+  <section class="slide dark" data-part="3 · Live exercise" data-phase="r2">
+    <div class="meta"><span>3 · Live exercise</span><span>Round 2</span></div>
+    <h2 class="title">Rate it again.</h2>
+    <div class="ex-grid" style="grid-template-columns: 1fr 1fr">
+      <div style="display:flex; gap:32px; align-items:end">
+        <div class="qrbox" data-qr>[QR code]</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <p class="label">same link</p>
+          <p style="font: 500 34px var(--mono)"><span class="edit ph" contenteditable="plaintext-only" data-edit="link" spellcheck="false">[short link]</span></p>
+          <p class="label">Same four sliders. Has anything moved?</p>
+        </div>
+      </div>
+      <div class="sliders" aria-label="The four sliders on your phone">
+        <div class="sl"><span>warm</span><span class="track"><i style="left:50%"></i></span><span>cool</span></div>
+        <div class="sl"><span>calm</span><span class="track"><i style="left:50%"></i></span><span>tense</span></div>
+        <div class="sl"><span>ordered</span><span class="track"><i style="left:50%"></i></span><span>chaotic</span></div>
+        <div class="sl"><span>flat</span><span class="track"><i style="left:50%"></i></span><span>deep</span></div>
+      </div>
+    </div>
+    <aside class="notes">Same painting, same sliders, one minute. Nobody has to change anything; staying put is also an answer.</aside>
+  </section>
+
+  <!-- 20 · Shift -->
+  <section class="slide dark" data-part="3 · Live exercise" data-hook="shift">
+    <div class="meta"><span>3 · Live exercise</span><span>Round 1 → Round 2</span></div>
+    <h2 class="title">Did context change what we saw?</h2>
+    <div class="legend"><span><i style="border:3px solid var(--ikb-d); box-sizing:border-box"></i>Round 1</span><span><i style="background:var(--ikb-d)"></i>Round 2</span><span><i style="background:var(--machine-d); transform:rotate(45deg) scale(.8)"></i>Machine, unchanged</span></div>
+    <div class="res" id="shift"></div>
+    <aside class="notes">Arrows show how each person moved between rounds. The machine did not move at all: the pixels did not change, only what we know.</aside>
+  </section>
+
+  <!-- 21 · Discussion -->
+  <section class="slide" data-part="3 · Live exercise" data-phase="words" data-hook="words">
+    <div class="meta"><span>3 · Live exercise</span><span>With Kerem</span></div>
+    <h2 class="title">Three questions.</h2>
+    <div class="disc">
+      <div><h3>Form</h3><p>Where did the class and the machine diverge, and why?</p></div>
+      <div><h3>Meaning</h3><p>What did no slider capture?</p><div class="wordwall" id="wordwall">[Live: one word each, “what no slider caught”]</div></div>
+      <div><h3>Context</h3><p>The artist, the labor, the period: what did we leave out?</p></div>
+    </div>
+    <aside class="notes">Kerem leads this part. Keep the shift slide one click back so we can return to it.</aside>
+  </section>
+
+  <!-- 17 · Brief -->
+  <section class="slide" data-part="4 · Midterm">
+    <div class="meta"><span>4 · Midterm</span><span>The brief</span></div>
+    <h2 class="title">An individual data visualization about art or the art world.</h2>
+    <div class="flow">
+      <div><h3>Question</h3><p>A real question you cannot answer yet.</p></div>
+      <div class="arrow">→</div>
+      <div><h3>Data</h3><p>What, from where, how much. Collected by you, or an open collection like MoMA or the Met.</p></div>
+      <div class="arrow">→</div>
+      <div><h3>Form</h3><p>How it will stand in SUSAM, and why this kind of visualization: print, screen, object, drawing.</p></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="dates">
+      <div><b>Mon 12 Oct, 23:59</b><span>one paragraph, 150 words · <span class="edit ph" contenteditable="plaintext-only" data-edit="submit" spellcheck="false">[how to submit]</span></span></div>
+      <div><b>Tue 13 Oct</b><span>we discuss every idea in class</span></div>
+      <div><b>January 2027</b><span>exhibition at SUSAM</span></div>
+    </div>
+    <p class="label"><span class="edit ph" contenteditable="plaintext-only" data-edit="group" spellcheck="false">[Individual project — confirm with Kerem]</span></p>
+    <aside class="notes">Three words to remember: question, data, form. The paragraph is short on purpose; Tuesday we sharpen it together.</aside>
+  </section>
+
+  <!-- 18 · Paragraph -->
+  <section class="slide" data-part="4 · Midterm" data-hook="para">
+    <div class="meta"><span>4 · Midterm</span><span>Due Monday</span></div>
+    <h2 class="title">150 words, three moves.</h2>
+    <div class="para">
+      <div style="display:flex; flex-direction:column; gap:28px">
+        <p class="tpl">I ask <span class="blank">a question about art or the art world</span>. To answer it, I will use <span class="blank">what data, from where, how much</span>. I will <span class="blank">count, compare or map</span> it, because <span class="blank">why this method</span>. At SUSAM I will show it as <span class="blank">a print, a screen, an object or a drawing</span>, because <span class="blank">why this form fits</span>.</p>
+        <textarea id="mine" aria-label="Try your paragraph" placeholder="Try yours here. Nothing is sent anywhere."></textarea>
+        <p class="wc"><span>yours: <b id="mineCount">0</b> words</span></p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:18px">
+        <p class="label">Example</p>
+        <p class="example" id="example"><span class="q">Has the Museum of Modern Art collected more work by women since the Guerrilla Girls counted the Met in 1989?</span> <span class="d">I will use MoMA’s open collection data on GitHub: about 160,000 records, each with the artist’s recorded gender and the year the work entered the collection. I will count acquisitions by decade and keep records with no recorded gender as their own group, because who stays “unknown” is part of the answer. One archive, the Mies van der Rohe Archive, arrived in the 1960s and makes up almost a third of that decade, so I will show it separately.</span> <span class="f">At SUSAM I will show a large hand-drawn print on paper: one column per decade, every hundred works as one short pencil stroke, works by women in blue. The wall label will name what the data cannot show: collectives, identities the records do not hold, and works the museum never bought.</span></p>
+        <p class="wc"><span><b id="exCount">0</b> words</span><span style="box-shadow: inset 0 -6px 0 rgba(31,46,255,.35)">question</span><span style="box-shadow: inset 0 -6px 0 rgba(232,84,30,.35)">data</span><span style="box-shadow: inset 0 -6px 0 rgba(15,16,18,.25)">form</span></p>
+      </div>
+    </div>
+    <aside class="notes">The example uses facts we saw today, so it is checkable. Notice it already says what the data cannot show.</aside>
+  </section>
+
+  <!-- 19 · Forms for SUSAM -->
+  <section class="slide" data-part="4 · Midterm">
+    <div class="meta"><span>4 · Midterm</span><span>SUSAM</span></div>
+    <h2 class="title">Four ways to show it at SUSAM.</h2>
+    <div class="susam">
+      <div><h3>Print</h3><p class="e">Guerrilla Girls, <i>Do Women Have to Be Naked to Get into the Met. Museum?</i><small>poster, 1989</small></p><p class="e">W. E. B. Du Bois and students, <i>The Georgia Negro</i><small>hand-drawn charts, Paris, 1900</small></p></div>
+      <div><h3>Screen</h3><p class="e">Refik Anadol, <i>Unsupervised</i><small>MoMA lobby, 2022–23</small></p><p class="e">Aaron Koblin, <i>Flight Patterns</i><small>animated flight paths, 2005</small></p></div>
+      <div><h3>Object</h3><p class="e">Hans Haacke, <i>MoMA Poll</i><small>two transparent ballot boxes, 1970</small></p><p class="e">Nathalie Miebach<small>sculptures built from weather data</small></p></div>
+      <div><h3>Drawing</h3><p class="e">Giorgia Lupi and Stefanie Posavec, <i>Dear Data</i><small>postcards, 2014–15</small></p><p class="e">Mark Lombardi, <i>Narrative Structures</i><small>graphite network drawings, 1990s</small></p></div>
+    </div>
+    <aside class="notes">Haacke’s poll is the closest relative of what we just did with phones. A hand drawing is a fully accepted midterm.</aside>
+  </section>
+
+  <!-- 20 · Starter kit -->
+  <section class="slide" data-part="4 · Midterm">
+    <div class="meta"><span>4 · Midterm</span><span>Starter kit</span></div>
+    <h2 class="title">Starter kit.</h2>
+    <div class="kit">
+      <div><h3>Collect</h3><ul><li>MoMA collection <small>GitHub CSV</small></li><li>Met Open Access <small>CSV + API</small></li><li>Art Institute of Chicago <small>API</small></li><li>Wikidata <small>query service</small></li><li>Google Forms <small>your own survey</small></li></ul></div>
+      <div><h3>Clean and draw</h3><ul><li>Google Sheets, OpenRefine <small>cleaning</small></li><li>Datawrapper, RAWGraphs, Flourish <small>no code</small></li><li>Observable Plot <small>a little code</small></li><li>p5.js, D3.js <small>creative code</small></li><li>paper and pencil <small>always</small></li></ul></div>
+      <div><h3>Read</h3><ul><li>Amanda Wasielewski, <i>Computational Formalism</i> <small>MIT Press, 2023</small></li><li>Cleveland &amp; McGill, “Graphical Perception” <small>JASA, 1984</small></li><li>Johanna Drucker, “Humanities Approaches to Graphical Display” <small>DHQ, 2011</small></li></ul></div>
+    </div>
+    <p class="keep" style="font-size:56px">Paragraph due Monday 12 October, 23:59.</p>
+    <aside class="notes">Everything here is free. Bring your question on Tuesday even if the data part is still a guess.</aside>
+  </section>
+
+</main>
+
+<div class="livechip" id="liveChip" hidden></div>
+<div class="notes-panel" id="notesPanel" hidden><b>Speaker notes · press N to hide</b><span id="notesText"></span></div>
+<nav class="bar" aria-label="Slide controls">
+  <button type="button" id="bPrev" aria-label="Previous">←</button>
+  <span class="count" id="count">1 / 20</span>
+  <button type="button" id="bNext" aria-label="Next">→</button>
+  <button type="button" id="bNotes">Notes</button>
+  <button type="button" id="bFull">Full screen</button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script>
+/* The bloom sketch lives at the top level so the slide can show its real source. */
+const ACQ = [[1930, 1827, 2.7], [1940, 7650, 8.9], [1950, 6403, 5.8], [1960, 44796, 2.4], [1970, 13611, 12.4],
+             [1980, 10220, 11.1], [1990, 11691, 24.1], [2000, 25182, 22.4], [2010, 25492, 26.4], [2020, 8357, 26.1]];
+const VIEW = { mode: "art", hand: 0.35, t: 1 };
+const BLUE = "#1F2EFF", GREY = "#A3A9B2", INK = "#0F1012";
+function sketch(p) {
+  // ACQ rows: [decade, works acquired, % by women]
+  p.setup = () => { p.createCanvas(960, 520); p.noLoop(); };
+  p.draw = () => {
+    p.clear(); p.randomSeed(1965);
+    VIEW.t = Math.min(1, VIEW.t + 0.03);
+    p.textAlign(p.CENTER); p.textSize(17);
+    ACQ.forEach(([decade, works, women], i) => {
+      if (VIEW.mode === "chart") {
+        const x = 48 + i * 96, h = women * 14 * VIEW.t;
+        p.noStroke(); p.fill(BLUE);
+        p.rect(x - 30, 460 - h, 60, h, 4, 4, 0, 0);
+        p.fill(INK); p.text(decade, x, 494);
+        return;
+      }
+      const x = 100 + (i % 5) * 190;
+      const y = 130 + Math.floor(i / 5) * 250;
+      const r = Math.sqrt(works) * 0.4;   // area ~ works
+      for (let k = 0; k < 100 * VIEW.t; k++) { // 100 strokes
+        const a = k / 100 * p.TWO_PI - p.HALF_PI
+                + p.random(-1, 1) * VIEW.hand * 0.08;
+        const len = r * (1 - VIEW.hand * p.random(0.7));
+        p.stroke(k < women ? BLUE : GREY); p.strokeWeight(1.6);
+        p.line(x, y, x + Math.cos(a) * len, y + Math.sin(a) * len);
+      }
+      p.noStroke(); p.fill(INK); p.text(decade, x, y + 108);
+    });
+    if (VIEW.t >= 1) p.noLoop();
+  };
+}
+</script>
+<script>
+(() => {
+  /* ---------------- data ---------------- */
+  const MOMA = [[1930, 2.7], [1940, 8.9], [1950, 5.8], [1960, 2.4], [1970, 12.4], [1980, 11.1], [1990, 24.1], [2000, 22.4], [2010, 26.4], [2020, 26.1]];
+  const MUS = [["Metropolitan Museum of Art", 74809, 0], ["Tate", 8321, 0], ["Museum of Modern Art", 6947, 0], ["Pera Museum", 63, 1], ["Sakıp Sabancı Museum", 46, 1], ["Istanbul Painting & Sculpture", 8, 1], ["Istanbul Modern", 3, 1]];
+  const fmt = n => n.toLocaleString("en-US");
+  const $ = s => document.querySelector(s);
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const escHtml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* ---------------- live layer: active only when config.js defines window.LIVE ---------------- */
+  const LIVE = window.LIVE || null;
+  const LIVE_ON = !!(LIVE && LIVE.url && LIVE.key && window.supabase && /^va430-[\w.-]{1,54}$/.test(LIVE.session || ""));
+  const live = { r1: new Map(), r2: new Map(), words: new Map(), hidden: new Set(), ghosts: [], phones: 0, phase: "wait", control: false, connected: false, setPhase: null };
+  const AXIS_I = { cool: 0, tense: 1, chaos: 2, deep: 3 };
+  const PHASE_NAME = { wait: "waiting", r1: "round 1 open", r2: "round 2 open", words: "words open", closed: "closed" };
+  const avg = a => Math.round(a.reduce((s, v) => s + v, 0) / a.length);
+  function renderLive() {
+    if (!LIVE_ON) return;
+    document.querySelectorAll("#res .res-track").forEach(tr => {
+      const k = tr.dataset.k, box = tr.querySelector(".dots"), zone = tr.querySelector(".classzone");
+      if (!box) return;
+      const vals = [...live.r1.values()].map(v => v[k]);
+      const ghosts = live.ghosts.filter(g => g.phase === "r1" && !g.done);
+      zone.hidden = vals.length > 0 || ghosts.length > 0;
+      const bins = new Map(), step = vals.length > 40 ? 8 : 13;
+      let h = "";
+      vals.forEach(v => { const b = Math.round(v / 2), n = bins.get(b) || 0; bins.set(b, n + 1); h += `<span class="dot" style="left:${v}%; bottom:${Math.min(96, 8 + n * step)}px"></span>`; });
+      ghosts.forEach(g => { h += `<span class="ghost" style="left:${g.v[AXIS_I[k]]}%"></span>`; });
+      if (vals.length) { const m = avg(vals); h += `<span class="mean" style="left:${m}%"><span>class ${m}</span></span>`; }
+      box.innerHTML = h;
+    });
+    const ink = css("--ikb-d");
+    document.querySelectorAll("#shift .res-track").forEach(tr => {
+      const k = tr.dataset.k, box = tr.querySelector(".dots"), zone = tr.querySelector(".classzone");
+      if (!box) return;
+      const pairs = [...live.r2.entries()].filter(([d]) => live.r1.has(d)).map(([d, v2]) => [live.r1.get(d)[k], v2[k]]).sort((a, b) => a[0] - b[0]);
+      zone.hidden = pairs.length > 0;
+      const W = tr.clientWidth || 1188, H = 112;
+      let s = `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs><marker id="ah-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${ink}"/></marker></defs>`;
+      pairs.forEach(([a, b], i) => {
+        const y = pairs.length === 1 ? H / 2 : 10 + i * (H - 20) / (pairs.length - 1), x1 = a / 100 * W, x2 = b / 100 * W;
+        s += Math.abs(b - a) < 1.5 ? `<circle cx="${x1}" cy="${y}" r="4" fill="${ink}"/>`
+          : `<circle cx="${x1}" cy="${y}" r="3.5" fill="none" stroke="${ink}" stroke-width="1.5"/><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${ink}" stroke-width="2.5" marker-end="url(#ah-${k})"/>`;
+      });
+      box.innerHTML = pairs.length ? s + "</svg>" : "";
+      const cap = document.querySelector(`#shift [data-cap="${k}"]`);
+      if (cap) cap.textContent = pairs.length ? `class average ${avg(pairs.map(p => p[0]))} → ${avg(pairs.map(p => p[1]))} · ${pairs.filter(p => Math.abs(p[1] - p[0]) >= 10).length} of ${pairs.length} people moved 10 points or more` : "";
+    });
+    const ww = $("#wordwall");
+    if (ww) {
+      const counts = new Map();
+      live.words.forEach(w => { const key = w.toLowerCase(); if (live.hidden.has(key)) return; const o = counts.get(key) || { w, n: 0 }; o.n++; counts.set(key, o); });
+      if (!counts.size) { ww.classList.remove("live"); ww.textContent = "Waiting for words"; }
+      else { ww.classList.add("live"); ww.innerHTML = [...counts.entries()].sort((a, b) => b[1].n - a[1].n).map(([key, o]) => `<span class="w" data-key="${escHtml(key)}" title="Click to hide" style="font-size:${Math.min(72, 26 + o.n * 10)}px">${escHtml(o.w)}</span>`).join(""); }
+    }
+    const chip = $("#liveChip");
+    chip.hidden = false; chip.classList.toggle("on", live.connected);
+    chip.innerHTML = `<i></i>LIVE · ${PHASE_NAME[live.phase] || live.phase} · ${live.phones} phones · R1 ${live.r1.size} · R2 ${live.r2.size}${live.control ? " · <b>you control</b>" : ""}`;
+  }
+
+  /* ---------------- deck engine ---------------- */
+  const stage = $("#stage");
+  const slides = [...document.querySelectorAll(".slide")];
+  let cur = 0, step = 0, prevCur = -1;
+  const maxStep = s => Math.max(0, ...[...s.querySelectorAll("[data-step]")].map(e => +e.dataset.step));
+  const hooks = {};
+
+  function fit() {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  }
+  function render(enter) {
+    slides.forEach((s, i) => s.classList.toggle("active", i === cur));
+    const s = slides[cur];
+    s.querySelectorAll("[data-step]").forEach(e => e.classList.toggle("on", +e.dataset.step <= step));
+    $("#progress").style.width = `${(cur + 1) / slides.length * 100}%`;
+    $("#count").textContent = `${cur + 1} / ${slides.length}`;
+    const n = s.querySelector("aside.notes");
+    $("#notesText").textContent = n ? n.textContent : "";
+    try { history.replaceState(null, "", `#s${cur + 1}`); } catch (e) {}
+    const h = hooks[s.dataset.hook];
+    if (h) { if (enter && h.enter) h.enter(); if (h.step) h.step(step); }
+    if (enter && cur > prevCur && s.dataset.phase && live.control && live.setPhase) live.setPhase(s.dataset.phase);
+    if (enter) prevCur = cur;
+  }
+  function go(i, st = 0) { cur = Math.max(0, Math.min(slides.length - 1, i)); step = st; render(true); }
+  function next() { if (step < maxStep(slides[cur])) { step++; render(false); } else if (cur < slides.length - 1) go(cur + 1, 0); }
+  function prev() { if (step > 0) { step--; render(false); } else if (cur > 0) { const p = cur - 1; go(p, maxStep(slides[p])); } }
+
+  const typing = t => t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  addEventListener("keydown", e => {
+    if (typing(e.target)) { if (e.key === "Escape") e.target.blur(); return; }
+    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); next(); }
+    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(slides.length - 1);
+    else if (e.key === "n" || e.key === "N") toggleNotes();
+    else if (e.key === "f" || e.key === "F") full();
+    else if (LIVE_ON && (e.key === "l" || e.key === "L")) { live.control = !live.control; try { localStorage.setItem("dataart-live-control", live.control ? "1" : "0"); } catch (err) {} renderLive(); }
+    else if (LIVE_ON && live.control && live.setPhase && { "1": "r1", "2": "r2", "3": "words", "0": "closed", "9": "wait" }[e.key]) live.setPhase({ "1": "r1", "2": "r2", "3": "words", "0": "closed", "9": "wait" }[e.key]);
+  });
+  $("#bNext").addEventListener("click", next);
+  $("#bPrev").addEventListener("click", prev);
+  function toggleNotes() { const p = $("#notesPanel"); p.hidden = !p.hidden; }
+  $("#bNotes").addEventListener("click", toggleNotes);
+  function full() {
+    try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {}
+  }
+  $("#bFull").addEventListener("click", full);
+  let tx = null;
+  addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, { passive: true });
+  addEventListener("touchend", e => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 60 && !typing(e.target)) (dx < 0 ? next : prev)(); tx = null; });
+  addEventListener("resize", fit);
+
+  /* editable placeholders, remembered in this browser */
+  const EKEY = "dataart-session-edits";
+  let edits = {};
+  try { edits = JSON.parse(localStorage.getItem(EKEY) || "{}"); } catch (e) {}
+  document.querySelectorAll("[data-edit]").forEach(el => {
+    if (edits[el.dataset.edit]) el.textContent = edits[el.dataset.edit];
+    el.addEventListener("input", () => {
+      edits[el.dataset.edit] = el.textContent;
+      document.querySelectorAll(`[data-edit="${el.dataset.edit}"]`).forEach(o => { if (o !== el) o.textContent = el.textContent; });
+      try { localStorage.setItem(EKEY, JSON.stringify(edits)); } catch (e) {}
+    });
+  });
+
+  /* ---------------- image analysis ---------------- */
+  function loadImg(src) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; }); }
+  function analyze(im, maxSide = 300) {
+    const sc = Math.min(1, maxSide / Math.max(im.naturalWidth, im.naturalHeight));
+    const w = Math.max(2, Math.round(im.naturalWidth * sc)), h = Math.max(2, Math.round(im.naturalHeight * sc));
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    const c = cv.getContext("2d", { willReadFrequently: true }); c.drawImage(im, 0, 0, w, h);
+    const px = c.getImageData(0, 0, w, h).data, n = w * h;
+    const Y = new Float32Array(n), S = new Float32Array(n), Hh = new Float32Array(n), V = new Float32Array(n);
+    let r0 = 0, g0 = 0, b0 = 0;
+    for (let i = 0, p = 0; i < n; i++, p += 4) {
+      const r = px[p], g = px[p + 1], b = px[p + 2];
+      r0 += r; g0 += g; b0 += b;
+      Y[i] = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+      S[i] = mx ? d / mx : 0; V[i] = mx / 255;
+      let hh = 0;
+      if (d) { if (mx === r) hh = ((g - b) / d) % 6; else if (mx === g) hh = (b - r) / d + 2; else hh = (r - g) / d + 4; hh = (hh * 60 + 360) % 360; }
+      Hh[i] = hh;
+    }
+    const mag = new Float32Array(n), ang = new Float32Array(n);
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x;
+      const gx = -Y[i - w - 1] - 2 * Y[i - 1] - Y[i + w - 1] + Y[i - w + 1] + 2 * Y[i + 1] + Y[i + w + 1];
+      const gy = -Y[i - w - 1] - 2 * Y[i - w] - Y[i - w + 1] + Y[i + w - 1] + 2 * Y[i + w] + Y[i + w + 1];
+      mag[i] = Math.hypot(gx, gy); ang[i] = Math.atan2(gy, gx);
+    }
+    return { w, h, n, px, Y, S, H: Hh, V, mag, ang, mean: [r0 / n, g0 / n, b0 / n] };
+  }
+  const stats = (arr, from = 0, to = arr.length) => { let s = 0, s2 = 0, k = 0; for (let i = from; i < to; i++) { s += arr[i]; s2 += arr[i] * arr[i]; k++; } const m = s / k; return { mean: m, std: Math.sqrt(Math.max(0, s2 / k - m * m)) }; };
+  const edgeShare = (a, thr) => { let c = 0; for (let i = 0; i < a.n; i++) if (a.mag[i] > thr) c++; return c / a.n; };
+  function palette(a, k = 5) {
+    const pts = []; for (let i = 0; i < a.n; i += 3) pts.push([a.px[i * 4], a.px[i * 4 + 1], a.px[i * 4 + 2]]);
+    pts.sort((p, q) => (p[0] + p[1] + p[2]) - (q[0] + q[1] + q[2]));
+    let cs = Array.from({ length: k }, (_, j) => pts[Math.floor((j + .5) / k * pts.length)].slice());
+    let lab = new Int32Array(pts.length);
+    for (let it = 0; it < 10; it++) {
+      const sum = cs.map(() => [0, 0, 0, 0]);
+      pts.forEach((p, i) => { let b = 0, bd = 1e12; cs.forEach((c, j) => { const d = (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2; if (d < bd) { bd = d; b = j; } }); lab[i] = b; const s = sum[b]; s[0] += p[0]; s[1] += p[1]; s[2] += p[2]; s[3]++; });
+      cs = cs.map((c, j) => sum[j][3] ? [sum[j][0] / sum[j][3], sum[j][1] / sum[j][3], sum[j][2] / sum[j][3]] : c);
+    }
+    const counts = new Array(k).fill(0); lab.forEach(j => counts[j]++);
+    return cs.map((c, j) => ({ rgb: c.map(Math.round), share: counts[j] / pts.length })).sort((p, q) => q.share - p.share);
+  }
+  const hex = rgb => "#" + rgb.map(v => Math.round(v).toString(16).padStart(2, "0")).join("").toUpperCase();
+  function machine(a) {
+    let wsum = 0, wcos = 0;
+    for (let i = 0; i < a.n; i++) { const wt = a.S[i] * a.V[i]; if (wt <= 0) continue; wsum += wt; wcos += wt * Math.cos((a.H[i] - 30) * Math.PI / 180); }
+    const warm = wsum ? wcos / wsum : 0;
+    const cool = Math.round((1 - warm) / 2 * 100);
+    const st = stats(a.Y), es = edgeShare(a, 120);
+    const tense = Math.round(Math.min(1, 0.5 * st.std / 64 + 0.5 * es / 0.2) * 100);
+    const bins = new Array(12).fill(0); let tot = 0;
+    for (let i = 0; i < a.n; i++) if (a.mag[i] > 60) { let t = a.ang[i]; if (t < 0) t += Math.PI; const b = Math.min(11, Math.floor(t / Math.PI * 12)); bins[b] += a.mag[i]; tot += a.mag[i]; }
+    let ent = 0; bins.forEach(v => { if (v > 0) { const p = v / tot; ent -= p * Math.log(p); } });
+    const chaos = tot ? Math.round(ent / Math.log(12) * 100) : 0;
+    const third = Math.floor(a.h / 3) * a.w;
+    const top = stats(a.Y, 0, third), bot = stats(a.Y, a.n - third, a.n);
+    const sTop = stats(a.S, 0, third), sBot = stats(a.S, a.n - third, a.n);
+    const cf = (bot.std - top.std) / (st.std + 1), sf = (sBot.mean - sTop.mean) / (stats(a.S).mean + .05);
+    const deep = Math.round(Math.max(0, Math.min(1, 0.5 + 0.5 * (0.6 * cf + 0.4 * sf))) * 100);
+    return { cool, tense, chaos, deep };
+  }
+
+  /* ---------------- 1 · cover: dots → pixels → numbers ---------------- */
+  (async () => {
+    const cv = $("#coverCanvas"), c = cv.getContext("2d");
+    const W = cv.width, H = cv.height;
+    let im; try { im = await loadImg("img/seurat.jpg"); } catch (e) { return; }
+    const small = document.createElement("canvas"), sc = small.getContext("2d", { willReadFrequently: true });
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const paper = css("--paper-2");
+    function frame(t) {
+      if (!still && !slides[0].classList.contains("active")) { setTimeout(() => requestAnimationFrame(frame), 500); return; }
+      const ph = still ? 0.62 : (Math.sin(t / 2600) + 1) / 2;          // 0 → image-like, 1 → data
+      const cell = Math.round(14 + ph * ph * 96);
+      const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
+      small.width = cols; small.height = rows; sc.drawImage(im, 0, 0, cols, rows);
+      const d = sc.getImageData(0, 0, cols, rows).data;
+      c.fillStyle = paper; c.fillRect(0, 0, W, H);
+      const dots = cell < 46;
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+        const p = (y * cols + x) * 4, col = `rgb(${d[p]},${d[p + 1]},${d[p + 2]})`;
+        c.fillStyle = col;
+        if (dots) { c.beginPath(); c.arc(x * cell + cell / 2, y * cell + cell / 2, cell * 0.48, 0, Math.PI * 2); c.fill(); }
+        else {
+          c.fillRect(x * cell, y * cell, cell - 2, cell - 2);
+          if (cell > 70) {
+            const lum = 0.2126 * d[p] + 0.7152 * d[p + 1] + 0.0722 * d[p + 2];
+            c.fillStyle = lum > 140 ? "rgba(15,16,18,.85)" : "rgba(238,240,242,.9)";
+            c.font = `500 ${Math.round(cell * 0.17)}px "IBM Plex Mono", monospace`;
+            c.fillText(d[p], x * cell + 8, y * cell + cell * 0.32);
+            c.fillText(d[p + 1], x * cell + 8, y * cell + cell * 0.55);
+            c.fillText(d[p + 2], x * cell + 8, y * cell + cell * 0.78);
+          }
+        }
+      }
+      if (!still) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  /* ---------------- 3 · tombstone → row ---------------- */
+  hooks.data = {
+    step(st) {
+      document.querySelectorAll(".tomb .f").forEach((f, i) => {
+        clearTimeout(f._t);
+        if (st >= 1) f._t = setTimeout(() => f.classList.add("hl"), i * 90); else f.classList.remove("hl");
+      });
+    }
+  };
+
+  /* ---------------- 4 · morph chart ---------------- */
+  (() => {
+    const svg = $("#morphSvg"), box = $("#morphBox"), tip = box.querySelector(".tip");
+    const W = 1100, H = 560, L = 64, R = 20, T = 30, B = 60, max = 30;
+    const band = (W - L - R) / MOMA.length;
+    const sy = v => H - B - v / max * (H - T - B);
+    const NS = "http://www.w3.org/2000/svg";
+    const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+    const grid = mk("g", {}), marks = mk("g", {}), labels = mk("g", {});
+    const line = mk("polyline", { fill: "none", stroke: css("--ikb"), "stroke-width": 4, "stroke-linejoin": "round", "stroke-linecap": "round", opacity: 0 });
+    svg.append(grid, line, marks, labels);
+    for (const v of [0, 10, 20, 30]) { grid.append(mk("line", { x1: L, x2: W - R, y1: sy(v), y2: sy(v), stroke: css("--rule"), "stroke-width": v ? 1 : 2 })); const t = mk("text", { x: L - 14, y: sy(v) + 7, "text-anchor": "end" }); t.textContent = v; grid.append(t); }
+    const rects = MOMA.map(([d, v], i) => {
+      const r = mk("rect", { fill: css("--ikb") }); r.dataset.i = i; marks.append(r);
+      const t = mk("text", { x: L + band * i + band / 2, y: H - B + 34, "text-anchor": "middle" }); t.textContent = d === 2020 ? "2020*" : d; labels.append(t);
+      return r;
+    });
+    const valLabels = MOMA.map(([d, v], i) => { const t = mk("text", { class: "lbl", "text-anchor": "middle", opacity: 0 }); t.textContent = v; labels.append(t); return t; });
+    const ramp = v => { const a = [217, 220, 255], b = [31, 46, 255], k = v / max; return `rgb(${a.map((x, j) => Math.round(x + (b[j] - x) * k)).join(",")})`; };
+    const CAP = {
+      bar: "Length from a common baseline. Easy to compare any two decades.",
+      dot: "Position on a common scale: the most precise channel there is.",
+      line: "Slope shows change. The line also claims the years in between.",
+      area: "Area: the eye underestimates differences in size.",
+      color: "Color alone: you see light and dark, not 2.4 against 24.1."
+    };
+    const target = (mode, i, v) => {
+      const cx = L + band * i + band / 2;
+      if (mode === "bar") return { x: cx - band * 0.32, y: sy(v), w: band * 0.64, h: sy(0) - sy(v), rx: 4, fill: css("--ikb") };
+      if (mode === "dot") return { x: cx - 12, y: sy(v) - 12, w: 24, h: 24, rx: 12, fill: css("--ikb") };
+      if (mode === "line") return { x: cx - 8, y: sy(v) - 8, w: 16, h: 16, rx: 8, fill: css("--ikb") };
+      if (mode === "area") { const d = Math.sqrt(v / max) * band * 1.25; return { x: cx - d / 2, y: (H - B) / 2 + 30 - d / 2, w: d, h: d, rx: d / 2, fill: css("--ikb") }; }
+      return { x: L + band * i + 2, y: T + 120, w: band - 4, h: 200, rx: 0, fill: ramp(v) };
+    };
+    let state = MOMA.map(([, v], i) => target("bar", i, v)), mode = "bar", anim = null;
+    const apply = s => s.forEach((p, i) => { const r = rects[i]; r.setAttribute("x", p.x); r.setAttribute("y", p.y); r.setAttribute("width", Math.max(0, p.w)); r.setAttribute("height", Math.max(0, p.h)); r.setAttribute("rx", Math.max(0, Math.min(p.rx, p.w / 2, p.h / 2))); r.setAttribute("fill", p.fill); });
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const parse = c => c.startsWith("#") ? [1, 3, 5].map(j => parseInt(c.slice(j, j + 2), 16)) : c.match(/\d+/g).map(Number);
+    function setMode(m) {
+      const from = state.map(p => ({ ...p })), to = MOMA.map(([, v], i) => target(m, i, v));
+      const t0 = performance.now(), dur = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 750;
+      cancelAnimationFrame(anim);
+      const tick = now => {
+        const t = Math.min(1, (now - t0) / dur), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        state = from.map((p, i) => { const q = to[i], ca = parse(p.fill), cb = parse(q.fill); return { x: lerp(p.x, q.x, e), y: lerp(p.y, q.y, e), w: lerp(p.w, q.w, e), h: lerp(p.h, q.h, e), rx: lerp(p.rx, q.rx, e), fill: `rgb(${ca.map((x, j) => Math.round(lerp(x, cb[j], e))).join(",")})` }; });
+        apply(state);
+        if (t < 1) anim = requestAnimationFrame(tick);
+      };
+      anim = requestAnimationFrame(tick);
+      mode = m;
+      const axis = m === "bar" || m === "dot" || m === "line";
+      grid.style.transition = "opacity .4s"; grid.style.opacity = axis ? 1 : 0;
+      line.setAttribute("points", MOMA.map(([, v], i) => `${L + band * i + band / 2},${sy(v)}`).join(" "));
+      line.style.transition = "opacity .5s"; line.setAttribute("opacity", m === "line" ? 1 : 0);
+      valLabels.forEach((t, i) => {
+        const [d, v] = MOMA[i], cx = L + band * i + band / 2, show = (d === 1960 || d === 1990) && m !== "color" && m !== "area";
+        t.setAttribute("x", cx); t.setAttribute("y", sy(v) - 22); t.setAttribute("opacity", show ? 1 : 0);
+      });
+      $("#morphCap").textContent = CAP[m];
+      document.querySelectorAll("#morphModes button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+    }
+    document.querySelectorAll("#morphModes button").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+    svg.addEventListener("pointermove", e => {
+      const r = e.target.closest("rect[data-i]"); if (!r) { tip.hidden = true; return; }
+      const [d, v] = MOMA[+r.dataset.i], k = svg.getBoundingClientRect().width / W;
+      tip.textContent = `${d === 2020 ? "2020–26" : d + "s"} · ${v}% women`;
+      tip.style.left = (+r.getAttribute("x") + +r.getAttribute("width") / 2) * k + "px"; tip.style.top = +r.getAttribute("y") * k + "px"; tip.hidden = false;
+    });
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; });
+    apply(state); setMode("bar");
+    hooks.morph = { enter() { setMode(mode); } };
+  })();
+
+  /* ---------------- 7 · tools map ---------------- */
+  (() => {
+    const TOOLS = [
+      { n: "Pencil and paper", x: .03, y: .88, f: ["drawing", "print"], d: "The fastest prototype, and a finished work in itself.", u: "Mark Lombardi: graphite and coloured pencil. Lupi and Posavec: postcards." },
+      { n: "Google Sheets", x: .06, y: .06, f: ["screen", "print"], d: "Clean, count, pivot, and make quick standard charts." },
+      { n: "Datawrapper", x: .14, y: .15, f: ["screen", "print"], d: "Clean charts and maps in the browser; no code." },
+      { n: "Tableau Public", x: .26, y: .1, f: ["screen"], d: "Dashboards and interactive charts without code." },
+      { n: "Flourish", x: .2, y: .3, f: ["screen"], d: "Animated and interactive templates, including step-by-step stories." },
+      { n: "RAWGraphs", x: .1, y: .5, f: ["print", "screen"], d: "Less common chart types; exports SVG you can finish by hand." },
+      { n: "Figma / Illustrator", x: .04, y: .68, f: ["print", "drawing"], d: "Redraw and finish an exported chart for print." },
+      { n: "Graph Commons", x: .22, y: .55, f: ["screen", "print"], d: "Map networks of people, money and institutions, together with others.", u: "Burak Arıkan: Networks of Dispossession." },
+      { n: "Gephi", x: .33, y: .42, f: ["screen", "print"], d: "Free desktop software for laying out large networks." },
+      { n: "QGIS", x: .38, y: .25, f: ["print", "screen"], d: "Free desktop maps from your own geographic data." },
+      { n: "Observable Plot", x: .5, y: .2, f: ["screen", "print"], d: "Charts in a few lines of JavaScript." },
+      { n: "Python / R", x: .64, y: .12, f: ["screen", "print"], d: "pandas, matplotlib, ggplot2: analysis and charts for large data." },
+      { n: "Laser cutter, 3D print", x: .44, y: .78, f: ["object"], d: "Data in material form: physical charts and data sculpture." },
+      { n: "TouchDesigner", x: .56, y: .9, f: ["screen", "object"], d: "Node-based visuals for live and projected installations." },
+      { n: "Pen plotter", x: .66, y: .66, f: ["drawing", "print"], d: "A machine draws your code-made image with a real pen." },
+      { n: "p5.js / Processing", x: .76, y: .8, f: ["screen", "print", "object"], d: "Creative coding: drawing with data, generative form. The next slide runs p5.js.", u: "Aaron Koblin: The Sheep Market was made with Processing." },
+      { n: "D3.js", x: .87, y: .55, f: ["screen"], d: "Any custom, interactive form on the web; the steepest curve on this map." },
+      { n: "Arduino", x: .84, y: .92, f: ["object"], d: "Sensors, lights and motors: data that moves or sounds." },
+      { n: "Machine learning", x: .96, y: .97, f: ["screen"], d: "Models trained on images or text, usually in Python.", u: "Refik Anadol: Unsupervised used StyleGAN2 ADA on MoMA’s collection." }
+    ];
+    const svg = $("#toolSvg"), W = 1180, H = 560, L = 70, R = 30, T = 20, B = 60;
+    const sx = v => L + v * (W - L - R), sy = v => H - B - v * (H - T - B);
+    let filt = "all", sel = 15;
+    function draw() {
+      let s = `<line x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}" stroke="${css("--ink")}" stroke-width="2"/><line x1="${L}" y1="${T}" x2="${L}" y2="${H - B}" stroke="${css("--ink")}" stroke-width="2"/>`;
+      s += `<text x="${L}" y="${H - B + 34}" style="font-size:19px;fill:${css("--mute")}">no code</text><text x="${W - R}" y="${H - B + 34}" text-anchor="end" style="font-size:19px;fill:${css("--mute")}">a lot of code →</text>`;
+      s += `<text transform="translate(${L - 24},${H - B}) rotate(-90)" style="font-size:19px;fill:${css("--mute")}">standard charts</text><text transform="translate(${L - 24},${T}) rotate(-90)" text-anchor="end" style="font-size:19px;fill:${css("--mute")}">custom forms →</text>`;
+      s += `<path d="M ${sx(.3)} ${sy(-.01) - 14} L ${sx(.62)} ${sy(-.01) - 14}" stroke="${css("--mute")}" stroke-width="2" stroke-dasharray="6 6" fill="none"/><text x="${sx(.3)}" y="${sy(-.01) - 24}" style="font-size:17px;fill:${css("--mute")}">AI assistants can move you right; you still check the data</text>`;
+      TOOLS.forEach((t, i) => {
+        const on = filt === "all" || t.f.includes(filt), x = sx(t.x), y = sy(t.y), right = t.x > .8;
+        s += `<g class="dotg${on ? "" : " dim"}" data-i="${i}"><circle cx="${x}" cy="${y}" r="${i === sel ? 15 : 11}" fill="${i === sel ? css("--ikb") : css("--ink")}" stroke="${css("--paper")}" stroke-width="3"/><circle cx="${x}" cy="${y}" r="26" fill="transparent"/><text x="${right ? x - 22 : x + 20}" y="${y + 7}" text-anchor="${right ? "end" : "start"}" style="font-size:20px;fill:${css("--ink")};font-weight:${i === sel ? 600 : 400}">${t.n}</text></g>`;
+      });
+      svg.innerHTML = s;
+      const t = TOOLS[sel];
+      $("#toolCard").innerHTML = `<h3>${t.n}</h3><p>${t.d}</p><div class="fmts">${t.f.map(f => `<span>${f}</span>`).join("")}</div>${t.u ? `<p class="used">${t.u}</p>` : ""}`;
+    }
+    svg.addEventListener("click", e => { const g = e.target.closest(".dotg"); if (g) { sel = +g.dataset.i; draw(); } });
+    document.querySelectorAll("#toolSeg button").forEach(b => b.addEventListener("click", () => {
+      filt = b.dataset.f; document.querySelectorAll("#toolSeg button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      if (filt !== "all" && !TOOLS[sel].f.includes(filt)) sel = TOOLS.findIndex(t => t.f.includes(filt));
+      draw();
+    }));
+    draw();
+  })();
+
+  /* ---------------- 8 · bloom sketch (p5.js) ---------------- */
+  let bloomP5 = null;
+  $("#bloomCode").textContent = sketch.toString();
+  function startBloom() {
+    if (bloomP5 || typeof window.p5 !== "function") {
+      if (!bloomP5 && typeof window.p5 !== "function") $("#bloomHost").innerHTML = `<p class="label" style="padding:24px">p5.js could not load. Check the internet connection.</p>`;
+      return;
+    }
+    bloomP5 = new window.p5(sketch, $("#bloomHost"));
+  }
+  function replayBloom() { VIEW.t = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 0; if (bloomP5) bloomP5.loop(); }
+  document.querySelectorAll("#bloomSeg button").forEach(b => b.addEventListener("click", () => {
+    VIEW.mode = b.dataset.m; document.querySelectorAll("#bloomSeg button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    $("#bloomCap").textContent = VIEW.mode === "chart" ? "The same numbers as a bar chart: share of works by women, by decade (%)." : "Each bloom is a decade of MoMA acquisitions. Size: works acquired. 100 strokes = 100%. Blue strokes: share by women.";
+    replayBloom();
+  }));
+  $("#hand").addEventListener("input", e => { VIEW.hand = +e.target.value; VIEW.t = 1; if (bloomP5) bloomP5.redraw(); });
+  hooks.bloom = { enter() { startBloom(); replayBloom(); } };
+
+  /* ---------------- 10 · evidence ---------------- */
+  (() => {
+    const svg = $("#musSvg"), box = $("#musBox"), tip = box.querySelector(".tip");
+    const W = 900, L = 400, R = 80, T = 4, rowH = 44, gap = 18, w = W - L - R, max = 74809;
+    let scale = "lin";
+    function draw() {
+      const sx = v => scale === "lin" ? w * v / max : w * Math.log10(v) / 5;
+      const ticks = scale === "lin" ? [0, 25000, 50000, 75000] : [1, 10, 100, 1000, 10000, 100000];
+      const Hh = T + MUS.length * (rowH + gap);
+      let s = "";
+      for (const t of ticks) { const x = L + (t ? sx(t) : 0); s += `<line x1="${x}" x2="${x}" y1="0" y2="${Hh - gap}" stroke="${css("--rule")}"/><text x="${x}" y="${Hh + 14}" text-anchor="middle">${t >= 1000 ? (t / 1000) + "k" : t}</text>`; }
+      MUS.forEach(([n, v, tr], i) => {
+        const y = T + i * (rowH + gap), bw = Math.max(0, sx(v));
+        s += `<text class="lbl" x="${L - 16}" y="${y + rowH / 2 + 8}" text-anchor="end" style="font-size:21px${tr ? ";font-weight:500" : ""}">${n}</text>`;
+        s += `<rect x="${L}" y="${y}" width="${bw}" height="${rowH}" rx="4" fill="${css("--ikb")}"/>`;
+        s += `<text x="${L + bw + 10}" y="${y + rowH / 2 + 8}" style="fill:${css("--ink")}">${fmt(v)}</text>`;
+        s += `<rect data-i="${i}" x="${L}" y="${y}" width="${w}" height="${rowH}" fill="transparent"/>`;
+      });
+      svg.setAttribute("viewBox", `0 0 ${W} ${Hh + 24}`); svg.setAttribute("height", Hh + 24);
+      svg.innerHTML = s;
+    }
+    document.querySelectorAll("#scaleSeg button").forEach(b => b.addEventListener("click", () => { scale = b.dataset.scale; document.querySelectorAll("#scaleSeg button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); draw(); }));
+    svg.addEventListener("pointermove", e => { const r = e.target.closest("rect[data-i]"); if (!r) { tip.hidden = true; return; } const [n, v] = MUS[+r.dataset.i], k = svg.getBoundingClientRect().width / W; tip.textContent = `${n}: ${fmt(v)}`; tip.style.left = (L + 120) * k + "px"; tip.style.top = +r.getAttribute("y") * k + "px"; tip.hidden = false; });
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; });
+    draw();
+    let wf = ""; for (let i = 0; i < 100; i++) { const x = (i % 10) * 33, y = Math.floor(i / 10) * 33; wf += `<rect x="${x}" y="${y}" width="30" height="30" rx="2" fill="${i < 57 ? css("--ikb") : css("--machine")}"><title>${i < 57 ? "Turner" : "All other artists"}</title></rect>`; }
+    $("#waffle").innerHTML = wf;
+  })();
+
+  /* ---------------- 11 · cleaning: step 1 applies the rule ---------------- */
+  hooks.clean = { step(st) { $("#rawlist").classList.toggle("parsed", st >= 1); } };
+
+  /* ---------------- 12 · analysis ---------------- */
+  let anaA = null, anaPal = null, colorMode = "mean";
+  async function runAnalysis(src, name) {
+    let im; try { im = await loadImg(src); } catch (e) { return; }
+    $("#anaImg").src = src; if (name) $("#anaName").textContent = name;
+    anaA = analyze(im, 320); anaPal = palette(anaA, 5);
+    drawColor(); drawLuma(); drawEdges();
+  }
+  function drawColor() {
+    if (!anaA) return;
+    const out = $("#colorOut"), cap = $("#colorCap");
+    if (colorMode === "mean") { const h = hex(anaA.mean); out.innerHTML = `<div class="sw"><div style="flex:1;background:${h}"><span>${h}</span></div></div>`; cap.textContent = "the average of every pixel"; }
+    else if (colorMode === "pal") { out.innerHTML = `<div class="sw">${anaPal.map(p => `<div style="flex:${p.share};background:${hex(p.rgb)}"><span>${Math.round(p.share * 100)}%</span></div>`).join("")}</div>`; cap.textContent = "five clusters of similar pixels (k-means)"; }
+    else {
+      const bins = new Array(36).fill(0); for (let i = 0; i < anaA.n; i++) bins[Math.min(35, Math.floor(anaA.H[i] / 10))] += anaA.S[i] * anaA.V[i];
+      const m = Math.max(...bins) || 1;
+      out.innerHTML = `<svg viewBox="0 0 360 120" width="100%" height="120" preserveAspectRatio="none">${bins.map((v, i) => `<rect x="${i * 10}" y="${120 - v / m * 118}" width="9" height="${v / m * 118}" fill="hsl(${i * 10 + 5},75%,50%)"/>`).join("")}</svg>`;
+      cap.textContent = "how much of each hue, weighted by saturation";
+    }
+  }
+  function drawLuma() {
+    const cv = $("#lumaCv"), c = cv.getContext("2d"), W = cv.width, H = cv.height;
+    const bins = new Array(64).fill(0); for (let i = 0; i < anaA.n; i++) bins[Math.min(63, anaA.Y[i] >> 2)]++;
+    const m = Math.max(...bins); c.fillStyle = css("--paper-2"); c.fillRect(0, 0, W, H); c.fillStyle = css("--ink");
+    bins.forEach((v, i) => { const h = v / m * (H - 10); c.fillRect(i * W / 64 + 1, H - h, W / 64 - 2, h); });
+    const st = stats(anaA.Y);
+    $("#lumaNum").innerHTML = `${Math.round(st.mean / 255 * 100)}<small>contrast ${Math.round(st.std / 127.5 * 100)}</small>`;
+  }
+  function drawEdges() {
+    const thr = +$("#thr").value; $("#thrVal").textContent = thr;
+    const cv = $("#edgeCv"), c = cv.getContext("2d");
+    cv.width = anaA.w; cv.height = anaA.h;
+    const img = c.createImageData(anaA.w, anaA.h);
+    for (let i = 0, p = 0; i < anaA.n; i++, p += 4) { const on = anaA.mag[i] > thr; const v = on ? 15 : 226; img.data[p] = v; img.data[p + 1] = v + (on ? 1 : 3); img.data[p + 2] = v + (on ? 3 : 7); img.data[p + 3] = 255; }
+    c.putImageData(img, 0, 0);
+    $("#edgeNum").textContent = `${Math.round(edgeShare(anaA, thr) * 100)}%`;
+  }
+  document.querySelectorAll("#colorSeg button").forEach(b => b.addEventListener("click", () => { colorMode = b.dataset.c; document.querySelectorAll("#colorSeg button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); drawColor(); }));
+  $("#thr").addEventListener("input", () => { if (anaA) drawEdges(); });
+  $("#anaFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) readFile(f, (src) => runAnalysis(src, f.name)); e.target.value = ""; });
+  hooks.analysis = { enter() { if (!anaA) runAnalysis("img/seurat.jpg"); } };
+
+  /* ---------------- 13 · Cleveland & McGill ---------------- */
+  let ratio = 0.42;
+  function drawCM() {
+    const A = 100, Bv = Math.round(ratio * 100), ink = css("--ink"), ikb = css("--ikb"), mach = css("--machine"), rule = css("--rule");
+    const panels = [
+      ["Position", "1 · common scale", `<line x1="40" y1="250" x2="40" y2="20" stroke="${rule}" stroke-width="2"/><circle cx="110" cy="${250 - A * 2.2}" r="14" fill="${ikb}"/><circle cx="210" cy="${250 - Bv * 2.2}" r="14" fill="${mach}"/>`],
+      ["Length", "3 · length, angle", `<rect x="60" y="40" width="44" height="${A * 2}" fill="${ikb}"/><rect x="170" y="${100}" width="44" height="${Bv * 2}" fill="${mach}"/>`],
+      ["Angle", "3 · length, angle", (() => { const tot = A + Bv, a1 = A / tot * Math.PI * 2, cx = 150, cy = 140, r = 110; const p = (ang) => [cx + r * Math.sin(ang), cy - r * Math.cos(ang)]; const [x1, y1] = p(a1); return `<path d="M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${a1 > Math.PI ? 1 : 0} 1 ${x1},${y1} Z" fill="${ikb}"/><path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${a1 > Math.PI ? 0 : 1} 1 ${cx},${cy - r} Z" fill="${mach}"/>`; })()],
+      ["Area", "4 · area", (() => { const rA = 72, rB = 72 * Math.sqrt(Bv / A); return `<circle cx="80" cy="150" r="${rA}" fill="${ikb}"/><circle cx="${80 + rA + 12 + rB}" cy="${150 + rA - rB}" r="${rB}" fill="${mach}"/>`; })()],
+      ["Color", "6 · saturation", (() => { const ramp = v => { const a = [226, 229, 255], b = [31, 46, 255], k = v / 100; return `rgb(${a.map((x, j) => Math.round(x + (b[j] - x) * k)).join(",")})`; }; return `<rect x="20" y="50" width="120" height="180" fill="${ramp(A)}"/><rect x="160" y="50" width="120" height="180" fill="${ramp(Bv)}"/>`; })()]
+    ];
+    $("#cmGrid").innerHTML = panels.map(([n, r, s]) => `<figure><svg viewBox="0 0 300 280" role="img" aria-label="${n} encoding">${s}</svg><h3>${n}</h3><p class="rank">rank ${r}</p></figure>`).join("");
+    $("#cmReveal").textContent = `B = ${Bv}% of A`;
+  }
+  $("#cmNew").addEventListener("click", () => { const opts = [0.18, 0.27, 0.36, 0.42, 0.55, 0.63, 0.71, 0.84]; let r; do { r = opts[Math.floor(Math.random() * opts.length)]; } while (r === ratio); ratio = r; step = 0; render(false); drawCM(); });
+  hooks.cm = { enter() { drawCM(); } };
+
+  /* ---------------- 14/15 · exercise image and machine estimate ---------------- */
+  const IKEY = "dataart-session-exercise-image";
+  let exSrc = null;
+  function setExercise(src) {
+    exSrc = src;
+    const img = $("#exImg"); img.src = src; img.hidden = false; $("#exPh").hidden = true; $("#artframe").classList.add("has");
+    const ci = $("#ctxImg"); ci.src = src; ci.hidden = false; $("#ctxPh").hidden = true;
+    try { if (src.length < 4.5e6) localStorage.setItem(IKEY, src); } catch (e) {}
+    machineEstimate();
+  }
+  try { const s = localStorage.getItem(IKEY); if (s) setExercise(s); } catch (e) {}
+  $("#exFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) readFile(f, setExercise); e.target.value = ""; });
+
+  const AXES = [["warm", "cool", "cool", "hue angle of colored pixels, weighted by saturation"], ["calm", "tense", "tense", "brightness contrast + share of edge pixels"], ["ordered", "chaotic", "chaos", "how evenly edge directions spread"], ["flat", "deep", "deep", "contrast and saturation fading toward the top"]];
+  let lastM = null;
+  function drawResults() {
+    $("#res").innerHTML = AXES.map(([l, r, k, how]) => `
+      <div class="res-row"><span class="end">${l}</span>
+        <div class="res-track" data-k="${k}"><div class="classzone">${LIVE_ON ? "Waiting for answers" : "Live class results will appear here"}</div><div class="dots"></div>${lastM ? `<span class="mk" style="left:${lastM[k]}%"></span><span class="mkl" style="left:${lastM[k]}%">${lastM[k]}</span>` : ""}</div>
+        <span class="end r">${r}</span></div>
+      <p class="res-cap">machine: ${how}</p>`).join("");
+    $("#resNote").textContent = lastM ? "" : "Add the artwork on the previous slide to compute the machine’s estimate.";
+    renderLive();
+  }
+  async function machineEstimate() {
+    if (!exSrc) { lastM = null; drawResults(); return; }
+    try { const im = await loadImg(exSrc); lastM = machine(analyze(im, 320)); } catch (e) { lastM = null; }
+    drawResults(); if (typeof drawShift === "function") drawShift();
+  }
+  hooks.results = { enter() { drawResults(); } };
+  drawResults();
+  function drawShift() {
+    $("#shift").innerHTML = AXES.map(([l, r, k]) => `
+      <div class="res-row"><span class="end">${l}</span>
+        <div class="res-track" data-k="${k}"><div class="classzone">${LIVE_ON ? "Waiting for round 2" : "Round 1 → Round 2 arrows will appear here"}</div><div class="dots"></div>${lastM ? `<span class="mk" style="left:${lastM[k]}%"></span><span class="mkl" style="left:${lastM[k]}%">${lastM[k]}</span>` : ""}</div>
+        <span class="end r">${r}</span></div>
+      <p class="res-cap" data-cap="${k}"></p>`).join("");
+    renderLive();
+  }
+  hooks.shift = { enter() { drawShift(); } };
+  drawShift();
+
+  /* ---------------- 18 · word counts ---------------- */
+  const words = s => (s.trim().match(/\S+/g) || []).length;
+  $("#exCount").textContent = words($("#example").textContent);
+  const mine = $("#mine");
+  try { mine.value = localStorage.getItem("dataart-session-para") || ""; } catch (e) {}
+  const upd = () => { $("#mineCount").textContent = words(mine.value); try { localStorage.setItem("dataart-session-para", mine.value); } catch (e) {} };
+  mine.addEventListener("input", upd); upd();
+
+  /* ---------------- files: pick or drop ---------------- */
+  function readFile(f, cb) { if (!f.type.startsWith("image/")) return; const fr = new FileReader(); fr.onload = () => cb(fr.result); fr.readAsDataURL(f); }
+  let depth = 0;
+  const canDrop = () => ["analysis", "exercise"].includes(slides[cur].dataset.hook);
+  addEventListener("dragenter", e => { if (canDrop() && [...(e.dataTransfer?.types || [])].includes("Files")) { depth++; document.body.classList.add("dropping"); } });
+  addEventListener("dragleave", () => { depth = Math.max(0, depth - 1); if (!depth) document.body.classList.remove("dropping"); });
+  addEventListener("dragover", e => e.preventDefault());
+  addEventListener("drop", e => {
+    e.preventDefault(); depth = 0; document.body.classList.remove("dropping");
+    const f = e.dataTransfer?.files?.[0]; if (!f || !canDrop()) return;
+    if (slides[cur].dataset.hook === "analysis") readFile(f, src => runAnalysis(src, f.name)); else readFile(f, setExercise);
+  });
+
+  /* ---------------- live connection ---------------- */
+  if (LIVE_ON) {
+    const S = LIVE.session;
+    const sb = window.supabase.createClient(LIVE.url, LIVE.key, { auth: { persistSession: false } });
+    const addRating = r => { if (!r || (r.round !== 1 && r.round !== 2)) return; (r.round === 1 ? live.r1 : live.r2).set(r.device, { cool: +r.cool, tense: +r.tense, chaos: +r.chaos, deep: +r.deep }); renderLive(); };
+    const addWord = w => { if (w && w.word) { live.words.set(w.device, String(w.word).slice(0, 40)); renderLive(); } };
+    (async () => {
+      const a = await sb.from("va430_ratings").select("round,device,cool,tense,chaos,deep").eq("session", S);
+      (a.data || []).forEach(addRating);
+      const b = await sb.from("va430_words").select("device,word").eq("session", S);
+      (b.data || []).forEach(addWord);
+    })();
+    sb.channel("va430-db-" + S)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "va430_ratings", filter: `session=eq.${S}` }, p => addRating(p.new))
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "va430_words", filter: `session=eq.${S}` }, p => addWord(p.new))
+      .subscribe();
+    const room = sb.channel("va430-room-" + S, { config: { broadcast: { self: false } } });
+    room.on("presence", { event: "sync" }, () => {
+      const g = [];
+      Object.values(room.presenceState()).forEach(metas => { const m = metas[metas.length - 1]; if (m && m.role === "phone" && Array.isArray(m.v)) g.push({ phase: m.phase, v: m.v.map(Number), done: !!m.done }); });
+      live.ghosts = g; live.phones = g.length; renderLive();
+    });
+    room.on("broadcast", { event: "phase" }, ({ payload }) => { if (!live.control && payload && PHASE_NAME[payload.phase]) { live.phase = payload.phase; renderLive(); } });
+    room.subscribe(status => { live.connected = status === "SUBSCRIBED"; renderLive(); });
+    const sendPhase = () => { if (live.control && live.connected) room.send({ type: "broadcast", event: "phase", payload: { phase: live.phase } }).catch(() => {}); };
+    live.setPhase = p => { live.phase = p; sendPhase(); renderLive(); };
+    setInterval(sendPhase, 3000);
+    try { live.control = localStorage.getItem("dataart-live-control") === "1"; } catch (e) {}
+    document.addEventListener("click", e => { const w = e.target.closest("#wordwall .w"); if (w && live.control) { live.hidden.add(w.dataset.key); renderLive(); } });
+    window.dataArtLive = { addRating, addWord };
+    renderLive();
+  }
+  /* QR code and short link for the poll */
+  if (LIVE && LIVE.pollUrl && window.qrcode) {
+    const full = LIVE.pollUrl + (LIVE.session ? "?s=" + encodeURIComponent(LIVE.session) : "");
+    const q = window.qrcode(0, "M"); q.addData(full); q.make();
+    document.querySelectorAll("[data-qr]").forEach(b => { b.innerHTML = q.createSvgTag({ cellSize: 8, margin: 0, scalable: true }); b.classList.add("has"); });
+    document.querySelectorAll('[data-edit="link"]').forEach(el => { el.textContent = LIVE.pollUrl.replace(/^https?:\/\//, "").replace(/\/$/, ""); el.removeAttribute("contenteditable"); el.classList.remove("ph"); });
+  }
+
+  /* ---------------- start ---------------- */
+  fit();
+  const m = /^#s(\d+)$/.exec(location.hash);
+  go(m ? Math.min(slides.length, Math.max(1, +m[1])) - 1 : 0);
+})();
+</script>
+
+</body>
+</html>

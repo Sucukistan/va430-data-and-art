@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Rate the painting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1012; --bg-2: #1A1C20; --ink: #EEF0F2; --mute: #9DA3AC; --rule: #2E3238; --ikb: #6A75FF; --warn: #E5602A;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif; --mono: "IBM Plex Mono", "Courier New", monospace;
+    color-scheme: dark;
+  }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--display); -webkit-font-smoothing: antialiased; }
+  [hidden] { display: none !important; }
+  main { max-width: 520px; margin: 0 auto; padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(28px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 22px; min-height: 100dvh; box-sizing: border-box; }
+  .top { display: flex; justify-content: space-between; font: 400 13px var(--mono); color: var(--mute); }
+  h1 { font: 800 52px/.92 var(--display); font-stretch: 70%; margin: 6px 0 0; letter-spacing: -.01em; }
+  p { margin: 0; font-size: 18px; line-height: 1.4; color: var(--mute); }
+  .axis { display: flex; flex-direction: column; gap: 10px; padding: 16px 0; border-top: 1px solid var(--rule); }
+  .ends { display: flex; justify-content: space-between; font: 600 22px var(--display); font-stretch: 85%; }
+  .ends span:last-child { text-align: right; }
+  .axis small { font: 400 12px var(--mono); color: var(--mute); }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: transparent; margin: 0; }
+  input[type=range]::-webkit-slider-runnable-track { height: 6px; background: var(--rule); border-radius: 3px; }
+  input[type=range]::-moz-range-track { height: 6px; background: var(--rule); border-radius: 3px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 34px; height: 34px; border-radius: 50%; background: var(--ink); margin-top: -14px; border: 0; }
+  input[type=range]::-moz-range-thumb { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); border: 0; }
+  input[type=range].moved::-webkit-slider-thumb { background: var(--ikb); }
+  input[type=range].moved::-moz-range-thumb { background: var(--ikb); }
+  input[type=range]:focus-visible { outline: 3px solid var(--ikb); outline-offset: 4px; }
+  button { font: 700 22px var(--display); font-stretch: 85%; color: var(--bg); background: var(--ink); border: 0; padding: 18px; width: 100%; cursor: pointer; border-radius: 2px; }
+  button:disabled { opacity: .5; }
+  button:focus-visible { outline: 3px solid var(--ikb); outline-offset: 3px; }
+  input[type=text] { font: 500 26px var(--display); width: 100%; box-sizing: border-box; padding: 16px; background: var(--bg-2); color: var(--ink); border: 2px solid var(--rule); border-radius: 2px; }
+  input[type=text]:focus { border-color: var(--ikb); outline: none; }
+  .big { font: 800 40px/.95 var(--display); font-stretch: 72%; color: var(--ink); }
+  .err { color: var(--warn); font-size: 16px; }
+  .spacer { flex: 1; }
+  .foot { font: 400 12px/1.5 var(--mono); color: var(--mute); }
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><span>VA430 / 530 · Data and Art</span><span id="conn">connecting…</span></div>
+
+  <section id="vWait">
+    <h1>Look at the screen.</h1>
+    <p style="margin-top:14px">The next step opens here by itself. Keep this page open.</p>
+  </section>
+
+  <section id="vRate" hidden>
+    <h1 id="rateTitle">Round 1</h1>
+    <p style="margin-top:12px">Look at the painting for a moment, then move each slider to where it feels right.</p>
+    <div id="axes" style="margin-top:12px"></div>
+    <button type="button" id="send">Send</button>
+    <p class="err" id="rateErr" hidden></p>
+  </section>
+
+  <section id="vWord" hidden>
+    <h1>One word.</h1>
+    <p style="margin-top:12px">What did no slider capture?</p>
+    <div style="display:flex; flex-direction:column; gap:14px; margin-top:18px">
+      <input type="text" id="word" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="One word">
+      <button type="button" id="sendWord">Send</button>
+      <p class="err" id="wordErr" hidden></p>
+    </div>
+  </section>
+
+  <section id="vDone" hidden>
+    <p class="big" id="doneText">Thank you.</p>
+    <p style="margin-top:14px">Watch the screen.</p>
+  </section>
+
+  <section id="vClosed" hidden>
+    <h1>Thank you.</h1>
+    <p style="margin-top:14px">This poll is closed.</p>
+  </section>
+
+  <section id="vOff" hidden>
+    <h1>Not set up yet.</h1>
+    <p style="margin-top:14px">This poll has no connection settings. Ask the person presenting.</p>
+  </section>
+
+  <div class="spacer"></div>
+  <p class="foot">No names are collected. Your phone gets a random id so your two rounds can be compared. Answers can be seen by everyone in the room.</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script src="../config.js"></script>
+<script>
+(() => {
+  const AXES = [["warm", "cool", "cool"], ["calm", "tense", "tense"], ["ordered", "chaotic", "chaos"], ["flat", "deep", "deep"]];
+  const $ = s => document.querySelector(s);
+  const cfg = window.LIVE || {};
+  const S = (new URLSearchParams(location.search).get("s") || cfg.session || "").trim();
+  const views = ["vWait", "vRate", "vWord", "vDone", "vClosed", "vOff"];
+  const show = id => views.forEach(v => { $("#" + v).hidden = v !== id; });
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+  let device = store.get("va430-device");
+  if (!device) {
+    device = (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join(""));
+    store.set("va430-device", device);
+  }
+  const doneKey = r => `va430-done-${S}-${r}`;
+
+  if (!cfg.url || !cfg.key || !window.supabase || !/^va430-[\w.-]{1,54}$/.test(S)) { show("vOff"); $("#conn").textContent = "offline"; return; }
+
+  const sb = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: false } });
+  let phase = "wait";
+  const vals = { cool: 50, tense: 50, chaos: 50, deep: 50 };
+
+  $("#axes").innerHTML = AXES.map(([l, r, k]) => `
+    <div class="axis">
+      <div class="ends"><span>${l}</span><span>${r}</span></div>
+      <input type="range" id="r-${k}" min="0" max="100" value="50" aria-label="${l} to ${r}">
+    </div>`).join("");
+
+  let room = null, lastTrack = 0, trackTimer = null;
+  function track() {
+    if (!room) return;
+    const now = Date.now();
+    const go = () => { lastTrack = Date.now(); room.track({ role: "phone", phase, v: [vals.cool, vals.tense, vals.chaos, vals.deep], done: !!store.get(doneKey(phase)) }).catch(() => {}); };
+    clearTimeout(trackTimer);
+    if (now - lastTrack > 150) go(); else trackTimer = setTimeout(go, 150);
+  }
+  AXES.forEach(([, , k]) => {
+    const el = $("#r-" + k);
+    el.addEventListener("input", () => { vals[k] = +el.value; el.classList.add("moved"); track(); });
+  });
+
+  function render() {
+    if (phase === "r1" || phase === "r2") {
+      if (store.get(doneKey(phase))) { $("#doneText").textContent = phase === "r1" ? "Round 1 sent." : "Round 2 sent."; show("vDone"); return; }
+      $("#rateTitle").textContent = phase === "r1" ? "Round 1" : "Round 2";
+      show("vRate");
+    } else if (phase === "words") {
+      if (store.get(doneKey("words"))) { $("#doneText").textContent = "Word sent."; show("vDone"); return; }
+      show("vWord");
+    } else if (phase === "closed") show("vClosed");
+    else show("vWait");
+  }
+
+  async function send() {
+    const r = phase === "r1" ? 1 : phase === "r2" ? 2 : 0; if (!r) return;
+    const btn = $("#send"); btn.disabled = true; $("#rateErr").hidden = true;
+    const { error } = await sb.from("va430_ratings").insert({ session: S, round: r, device, ...vals });
+    btn.disabled = false;
+    if (error && error.code !== "23505") { $("#rateErr").textContent = "Could not send. Check your connection and try again."; $("#rateErr").hidden = false; return; }
+    store.set(doneKey(phase), "1"); track(); render();
+  }
+  async function sendWord() {
+    const w = $("#word").value.replace(/\s+/g, " ").trim().slice(0, 40); if (!w) return;
+    const btn = $("#sendWord"); btn.disabled = true; $("#wordErr").hidden = true;
+    const { error } = await sb.from("va430_words").insert({ session: S, device, word: w });
+    btn.disabled = false;
+    if (error && error.code !== "23505") { $("#wordErr").textContent = "Could not send. Try again."; $("#wordErr").hidden = false; return; }
+    store.set(doneKey("words"), "1"); render();
+  }
+  $("#send").addEventListener("click", send);
+  $("#sendWord").addEventListener("click", sendWord);
+  $("#word").addEventListener("keydown", e => { if (e.key === "Enter") sendWord(); });
+
+  room = sb.channel("va430-room-" + S, { config: { presence: { key: device }, broadcast: { self: false } } });
+  room.on("broadcast", { event: "phase" }, ({ payload }) => {
+    const p = payload && payload.phase;
+    if (["wait", "r1", "r2", "words", "closed"].includes(p) && p !== phase) {
+      phase = p;
+      AXES.forEach(([, , k]) => { const el = $("#r-" + k); el.value = 50; el.classList.remove("moved"); vals[k] = 50; });
+      render(); track();
+    }
+  });
+  room.subscribe(status => {
+    $("#conn").textContent = status === "SUBSCRIBED" ? "connected" : status === "CHANNEL_ERROR" || status === "TIMED_OUT" ? "reconnecting…" : "connecting…";
+    if (status === "SUBSCRIBED") track();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
