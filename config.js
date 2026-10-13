@@ -4,5 +4,5 @@ window.LIVE = {
   "url": "",
   "key": "",
   "session": "va430-test",
-  "pollUrl": "https://sucukistan.github.io/va430-data-and-art/p/"
+  "pollUrl": "https://caglarfurkan.github.io/va430-data-and-art/p/"
 };
